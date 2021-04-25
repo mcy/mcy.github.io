@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>mcyoung</title>
+ <link href="https://mcyoung.xyz/atom.xml" rel="self"/>
+ <link href="https://mcyoung.xyz/"/>
+ <updated>2021-04-25T00:46:52-04:00</updated>
+ <id>https://mcyoung.xyz</id>
+ <author>
+   <name>Miguel Young de la Sota</name>
+   <email></email>
+ </author>
+
+ 
+
+</feed>
