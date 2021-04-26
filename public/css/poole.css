@@ -75,8 +75,13 @@ a strong {
 }
 /* `:focus` is linked to `:hover` for basic accessibility */
 a:hover,
-a:focus {
+a:focus,
+a code {
   text-decoration: underline;
+}
+a:hover code,
+a:focus code {
+  color: #fff;
 }
 
 /* Headings */
