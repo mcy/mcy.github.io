@@ -4,7 +4,7 @@
  <title>mcyoung</title>
  <link href="https://mcyoung.xyz/atom.xml" rel="self"/>
  <link href="https://mcyoung.xyz/"/>
- <updated>2021-05-24T10:22:27-04:00</updated>
+ <updated>2021-05-24T10:24:03-04:00</updated>
  <id>https://mcyoung.xyz</id>
  <author>
    <name>Miguel Young de la Sota</name>
@@ -340,7 +340,7 @@ to create a guaranteed-aligned pointer without a designated lifetime&lt;sup id=&
 &lt;p&gt;Rust and C++ have many other pointer types, such as smart pointers. However, in
 both languages, both are built in terms of these basic pointer types. Hopefully
 this article is a useful reference for anyone writing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; abstraction that
-wishes to avoid using raw pointers when possible.&lt;/p&gt;
+wishes to avoid using raw pointers when possible. ◼&lt;/p&gt;
 &lt;div class=&quot;footnotes&quot; role=&quot;doc-endnotes&quot;&gt;
   &lt;ol&gt;
     &lt;li id=&quot;fn:go-nuts&quot; role=&quot;doc-endnote&quot;&gt;
