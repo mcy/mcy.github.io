@@ -1,5 +1,406 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://mcyoung.xyz/https://mcyoung.xyz/feed.xml" rel="self" type="application/atom+xml" /><link href="https://mcyoung.xyz/https://mcyoung.xyz/" rel="alternate" type="text/html" /><updated>2021-04-26T19:56:20-04:00</updated><id>https://mcyoung.xyz/https://mcyoung.xyz/feed.xml</id><title type="html">mcyoung</title><subtitle>I'm Miguel. I write about questionable C++ and Rust code. I also have an art blog linked below.
-</subtitle><author><name>Miguel Young de la Sota</name></author><entry><title type="html">Move Constructors in Rust: Is it possible?</title><link href="https://mcyoung.xyz/https://mcyoung.xyz/2021/04/26/move-ctors/" rel="alternate" type="text/html" title="Move Constructors in Rust: Is it possible?" /><published>2021-04-26T00:00:00-04:00</published><updated>2021-04-26T00:00:00-04:00</updated><id>https://mcyoung.xyz/https://mcyoung.xyz/2021/04/26/move-ctors</id><content type="html" xml:base="https://mcyoung.xyz/https://mcyoung.xyz/2021/04/26/move-ctors/">&lt;p&gt;I’ve been told I need to write this idea down – I figure this one’s a good
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://mcyoung.xyz/https://mcyoung.xyz/feed.xml" rel="self" type="application/atom+xml" /><link href="https://mcyoung.xyz/https://mcyoung.xyz/" rel="alternate" type="text/html" /><updated>2021-05-24T10:22:27-04:00</updated><id>https://mcyoung.xyz/https://mcyoung.xyz/feed.xml</id><title type="html">mcyoung</title><subtitle>I'm Miguel. I write about questionable C++ and Rust code. I also have an art blog linked below.
+</subtitle><author><name>Miguel Young de la Sota</name></author><entry><title type="html">The Taxonomy of Pointers</title><link href="https://mcyoung.xyz/https://mcyoung.xyz/2021/05/24/ptr-taxonomy/" rel="alternate" type="text/html" title="The Taxonomy of Pointers" /><published>2021-05-24T00:00:00-04:00</published><updated>2021-05-24T00:00:00-04:00</updated><id>https://mcyoung.xyz/https://mcyoung.xyz/2021/05/24/ptr-taxonomy</id><content type="html" xml:base="https://mcyoung.xyz/https://mcyoung.xyz/2021/05/24/ptr-taxonomy/">&lt;p&gt;Writing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; in Rust usually involves manual management of memory. Although,
+ideally, we’d like to exclusively use references for this, sometimes the
+constraints they apply are too strong. This post is a guide on those constraints
+and how to weaken them for correctness.&lt;/p&gt;
+
+&lt;p&gt;“Unmanaged” languages, like C++ and Rust, provide &lt;em&gt;pointer&lt;/em&gt; types for
+manipulating memory. These types serve different purposes and provide different
+guarantees. These guarantees are useful for the optimizer but get in the way of
+correctness of low-level code. This is especially true in Rust, where these
+constraints are very tight.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;NB: This post only surveys &lt;em&gt;data&lt;/em&gt; pointers. Function pointers are their own
+beast, but generally are less fussy, since they all have static
+lifetime&lt;sup id=&quot;fnref:go-nuts&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:go-nuts&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;basic-c-pointers&quot;&gt;&lt;a href=&quot;#basic-c-pointers&quot;&gt;Basic C++ Pointers&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;First, let’s survey C++. We have three pointer types: the traditional C pointer
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T*&lt;/code&gt;, C++ references &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&lt;/code&gt;, and rvalue references &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&amp;amp;&lt;/code&gt;. These generally have
+pretty weak guarantees.&lt;/p&gt;
+
+&lt;p&gt;Pointers provide virtually no guarantees at all: they can be null, point to
+uninitialized memory, or point to nothing at all! C++ Only requires that they
+be aligned&lt;sup id=&quot;fnref:unaligned&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:unaligned&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;. They are little more than an address (until they are
+dereferenced, of course).&lt;/p&gt;
+
+&lt;p&gt;References, on the other hand, are intended to be the “primary” pointer type. A
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&lt;/code&gt; cannot be null, is well-aligned, and is intended to only refer to live
+memory (although it’s not something C++ can really guarantee for lack of a
+borrow-checker). References are short-lived.&lt;/p&gt;
+
+&lt;p&gt;C++ uses non-nullness to its advantage. For example, Clang will absolutely
+delete code of the form&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;C++&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;nullptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;DoSomething&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Because references cannot be null, and dereferencing the null pointer is always
+UB, the compiler may make this fairly strong assumption.&lt;/p&gt;
+
+&lt;p&gt;Rvalue references, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&amp;amp;&lt;/code&gt;, are not meaningfully different from normal references,
+beyond their role in overload resolution.&lt;/p&gt;
+
+&lt;p&gt;Choosing a C++ (primitive) pointer type is well-studied and not the primary
+purpose of this blog. Rather, we’re interested in how these map to Rust, which
+has significantly more complicated pointers.&lt;/p&gt;
+
+&lt;h2 id=&quot;basic-rust-pointers&quot;&gt;&lt;a href=&quot;#basic-rust-pointers&quot;&gt;Basic Rust Pointers&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Like C++, Rust has two broad pointer types: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*const T&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*mut T&lt;/code&gt;, the raw
+pointers, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt;, the references.&lt;/p&gt;
+
+&lt;p&gt;Rust pointer have even fewer constraints than C++ pointers; they need not even
+be aligned&lt;sup id=&quot;fnref:unaligned-access&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:unaligned-access&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;! The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;const&lt;/code&gt;/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mut&lt;/code&gt; specifier is basically
+irrelevant, but is useful as programmer book-keeping tool. Rust also does not
+enforce the dreaded strict-aliasing rule&lt;sup id=&quot;fnref:strict-aliasing&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:strict-aliasing&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;4&lt;/a&gt;&lt;/sup&gt; on its pointers.&lt;/p&gt;
+
+&lt;p&gt;On the other hand, Rust references are among the most constrained objects in any
+language that I know of. A shared reference &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;'a T&lt;/code&gt;, lasting for the lifetime
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'a&lt;/code&gt;, satisfies:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Non-null, and well-aligned (like in C++).&lt;/li&gt;
+  &lt;li&gt;Points to a valid, initialized &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&lt;/code&gt; for the duration of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'a&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&lt;/code&gt; is never ever mutated for the duration of the reference: the compiler may
+fold separate reads into one at will. Stronger still, no &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt; is reachable
+from any thread while the reference is reachable.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Stronger still are &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;'a mut T&lt;/code&gt; references, sometimes called &lt;em&gt;unique&lt;/em&gt; references,
+because in addition to being well-aligned and pointing to a valid &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&lt;/code&gt; at all
+times, no other reachable reference ever aliases it in any thread; this is
+equivalent to a C &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T* restrict&lt;/code&gt; pointer.&lt;/p&gt;
+
+&lt;p&gt;Unlike C++, which has two almost-identical pointer types, Rust’s two pointer
+types provide either no guarantees or &lt;em&gt;all&lt;/em&gt; of them. The following &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt;
+operations are all UB:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;null&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;*&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// A reference to u8 need not be sufficiently aligned&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// for a reference to u32.&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unaligned&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0u8&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// More on this type later...&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uninit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;*&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;MaybeUninit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;uninit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.as_ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c&quot;&gt;// Not UB in C++ with const_cast!&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// Two mutable references live at the same time pointing to&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// the same memory. This would also be fine in C++!&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;wide-pointers&quot;&gt;&lt;a href=&quot;#wide-pointers&quot;&gt;Wide Pointers&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Rust also provides the slice types &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;[T]&lt;/code&gt;&lt;sup id=&quot;fnref:std-span&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:std-span&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;5&lt;/a&gt;&lt;/sup&gt; (of which you get
+mutable/immutable reference and pointer varieties) and dynamic trait object
+types &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;dyn Tr&lt;/code&gt; (again, all four basic pointer types are available).&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;[T]&lt;/code&gt; is a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usize&lt;/code&gt;&lt;sup id=&quot;fnref:usize&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:usize&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;6&lt;/a&gt;&lt;/sup&gt; length plus a pointer to that many &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&lt;/code&gt;s. The pointer
+type of the slice specifies the guarantees on the pointed-to buffer. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*mut [T]&lt;/code&gt;,
+for example, has no meaningful guarantees, but still contains the length&lt;sup id=&quot;fnref:ptr-len&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:ptr-len&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;7&lt;/a&gt;&lt;/sup&gt;.
+Note that the length is part of the pointer value, &lt;em&gt;not&lt;/em&gt; the pointee.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;dyn Tr&lt;/code&gt; is a trait object. For our purposes, it consists of a pointer to some
+data plus a pointer to a static vtable. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*mut dyn Tr&lt;/code&gt; is technically a valid
+type&lt;sup id=&quot;fnref:raw-vtable&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:raw-vtable&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;8&lt;/a&gt;&lt;/sup&gt;. Overall, trait objects aren’t really relevant to this
+post; they are rarely used this way in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; settings.&lt;/p&gt;
+
+&lt;h2 id=&quot;weakening-the-guarantees&quot;&gt;&lt;a href=&quot;#weakening-the-guarantees&quot;&gt;Weakening the Guarantees&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Suppose we’re building some kind of data structure; in Rust, data structures
+will need some sprinkling of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt;, since they will need to shovel around
+memory directly. Typically this is done using raw pointers, but it is preferable
+to use the &lt;em&gt;least weakened&lt;/em&gt; pointer type to allow the compiler to perform
+whatever optimizations it can.&lt;/p&gt;
+
+&lt;p&gt;There are a number of orthogonal guarantees on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt; we might want
+to relax:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Non-nullness.&lt;/li&gt;
+  &lt;li&gt;Well-aligned-ness.&lt;/li&gt;
+  &lt;li&gt;Validity and initialized-ness of the pointee.&lt;/li&gt;
+  &lt;li&gt;Allocated-ness of the pointee (implied by initialized-ness).&lt;/li&gt;
+  &lt;li&gt;Global uniqueness of an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;pointer-to-zst&quot;&gt;&lt;a href=&quot;#pointer-to-zst&quot;&gt;Pointer to ZST&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;The last three of these properties are irrelevant for a zero-sized type. For
+example, we can generate infinite &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut ()&lt;/code&gt; with no consequences:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;unique_unit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0x1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; 
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We materialize a non-null, well-aligned pointer and reborrow it into a static
+reference; because there is no data to point to, none of the usual worries about
+the pointee itself apply. However, the pointer itself must still be non-null and
+well-aligned; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0x1&lt;/code&gt; is not a valid address for an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;[u32; 0]&lt;/code&gt;, but &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0x4&lt;/code&gt;
+is&lt;sup id=&quot;fnref:but-you-cannot-free-it&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:but-you-cannot-free-it&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;9&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+
+&lt;p&gt;This also applies to empty slices; in fact, the compiler will happily promote
+the expression &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut []&lt;/code&gt; to an arbitrary lifetime:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unique_empty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;null-references&quot;&gt;&lt;a href=&quot;#null-references&quot;&gt;Null References&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;The most well-known manner of weakening is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Option&amp;lt;&amp;amp;T&amp;gt;&lt;/code&gt;. Rust guarantees that
+this is ABI-compatible with a C pointer &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;const T*&lt;/code&gt;, with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Option::&amp;lt;&amp;amp;T&amp;gt;::None&lt;/code&gt;
+being a null pointer on the C side. This “null pointer optimization” applies to
+any type recursively containing at least one &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&lt;/code&gt;.&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DoSomething&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;do_something&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;nf&quot;&gt;DoSomething&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;// C will see a `NULL` as the argument.&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The same effect can be achieved for a pointer type using the
+&lt;a href=&quot;https://doc.rust-lang.org/std/ptr/struct.NonNull.html&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NonNull&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/a&gt; standard
+library type: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Option&amp;lt;NonNull&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; is identical to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*mut T&lt;/code&gt;. This is most
+beneficial for types which would otherwise contain a raw pointer:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NonNull&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;cap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nd&quot;&gt;assert_eq!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;size_of&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;size_of&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;uninitialized-pointee&quot;&gt;&lt;a href=&quot;#uninitialized-pointee&quot;&gt;Uninitialized Pointee&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;No matter what, a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt; cannot point to uninitialized memory, since the compiler
+is free to assume it may read such references at any time with no consequences.&lt;/p&gt;
+
+&lt;p&gt;The following classic C pattern is verboten:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;C&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;initialize_foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Rust doesn’t provide any particularly easy ways to allocate memory without
+initializing it, too, so this usually isn’t a problem. The
+&lt;a href=&quot;https://doc.rust-lang.org/core/mem/union.MaybeUninit.html#method.assume_init_ref&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/a&gt;
+type can be used for safely allocating memory without initializing it, via
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MaybeUninit::uninit()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;This type acts as a sort of “optimization barrier” that prevents the compiler
+from assuming the pointee is initialized. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt; is a pointer to
+potentially uninitialized but definitely allocated memory. It has the
+same layout as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt;, and Rust provides functions like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;assume_init_ref()&lt;/code&gt; for
+asserting that a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt; is definitely initialized. This assertion is
+similar in consequence to dereferencing a raw pointer.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt; should almost be viewed as pointer
+types in their own right, since they can be converted to/from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt;
+under certain circumstances.&lt;/p&gt;
+
+&lt;p&gt;Because &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&lt;/code&gt; is almost a “subtype” of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt;, we are
+entitled&lt;sup id=&quot;fnref:requires-transmute&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:requires-transmute&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;10&lt;/a&gt;&lt;/sup&gt; to “forget” that the referent of a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt; is
+initialized converting it to a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt;. This makes sense because &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt;
+is covariant&lt;sup id=&quot;fnref:covariance&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:covariance&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;11&lt;/a&gt;&lt;/sup&gt; in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt;. However, this is not true of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt;, since
+it’s not covariant:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uninit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaybeUninit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;transmute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uninit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;MaybeUninit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;uninit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;// Oops, `x` is now uninit! &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;These types are useful for talking to C++ without giving up too many guarantees.
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Option&amp;lt;&amp;amp;MaybeUninit&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; is an almost perfect model of a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;const T*&lt;/code&gt;, under the
+assumption that most pointers in C++ are valid most of the time.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt; also finds use in working with raw blocks of memory, such as in
+a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Vec&lt;/code&gt;-style growable slice:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SliceVec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c&quot;&gt;// Backing memory. The first `len` elements of it are&lt;/span&gt;
+  &lt;span class=&quot;c&quot;&gt;// known to be initialized, but no more than that.&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaybeUninit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SliceVec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;MaybeUninit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;aliased-pointee&quot;&gt;&lt;a href=&quot;#aliased-pointee&quot;&gt;Aliased Pointee&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt; can never alias any other pointer, but is also the mechanism by which
+we perform mutation. It can’t even alias with pointers that Rust can’t see; Rust
+assumes no one else can touch this memory. Thus, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt; is not an appropriate
+analogue for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Like with uninitialized memory, Rust provides a “barrier” wrapper type,
+&lt;a href=&quot;https://doc.rust-lang.org/std/cell/struct.UnsafeCell.html&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;UnsafeCell&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/a&gt;.
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;UnsafeCell&amp;lt;T&amp;gt;&lt;/code&gt; is the “interior mutability” primitive, which permits us to
+mutate through an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;UnsafeCell&amp;lt;T&amp;gt;&lt;/code&gt; so long as concurrent reads and writes do not
+occur. We may even convert it to a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;mut T&lt;/code&gt; when we’re sure we’re holding the
+only reference.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;UnsafeCell&amp;lt;T&amp;gt;&lt;/code&gt; forms the basis of the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Cell&amp;lt;T&amp;gt;&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RefCell&amp;lt;T&amp;gt;&lt;/code&gt;, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Mutex&amp;lt;T&amp;gt;&lt;/code&gt;
+types, each of which performs a sort of “dynamic borrow-checking”:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Cell&amp;lt;T&amp;gt;&lt;/code&gt; only permits direct loads and stores.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RefCell&amp;lt;T&amp;gt;&lt;/code&gt; maintains a counter of references into it, which it uses to
+dynamically determine if a mutable reference would be unique.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Mutex&amp;lt;T&amp;gt;&lt;/code&gt;, which is like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RefCell&amp;lt;T&amp;gt;&lt;/code&gt; but using concurrency primitives to
+maintain uniqueness.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Because of this, Rust must treat &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;UnsafeCell&amp;lt;T&amp;gt;&lt;/code&gt; as always aliasing, but
+because we can mutate through it, it is a much closer analogue to a C++ &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&lt;/code&gt;.
+However, because &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;T&lt;/code&gt; assumes the pointee is never mutated, it cannot coexist
+with a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;UnsafeCell&amp;lt;T&amp;gt;&lt;/code&gt; to the same memory, if mutation is performed through it.
+The following is explicitly UB:&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot; pretty-lang=&quot;Rust&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// This is ok; creating the reference to UnsafeCell does not&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// immediately trigger UB.&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;transmute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UnsafeCell&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;// But writing to it does!&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Cell&amp;lt;T&amp;gt;&lt;/code&gt; type is useful for non-aliasing references to plain-old-data types,
+which tend to be &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Copy&lt;/code&gt;. It allows us to perform mutation without having to
+utter &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt;. For example, the correct type for a shared mutable buffer in
+Rust is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;[Cell&amp;lt;u8&amp;gt;]&lt;/code&gt;, which can be freely &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;memcpy&lt;/code&gt;‘d,
+without worrying about aliasing&lt;sup id=&quot;fnref:but-thread-safety&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:but-thread-safety&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;12&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+
+&lt;p&gt;This is most useful for sharing memory with another language, like C++, which
+cannot respect Rust’s aliasing rules.&lt;/p&gt;
+
+&lt;h3 id=&quot;combined-barriers&quot;&gt;&lt;a href=&quot;#combined-barriers&quot;&gt;Combined Barriers&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;To recap:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Non-nullness can be disabled with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Option&amp;lt;&amp;amp;T&amp;gt;&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Initialized-ness can be disabled with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;MaybeUninit&amp;lt;T&amp;gt;&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Uniqueness can be disabled with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;UnsafeCell&amp;lt;T&amp;gt;&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;There is no way to disable alignment and validity restrictions: references
+must always be aligned and have a valid lifetime attached. If these are
+unachievable, raw pointers are your only option.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We can combine these various “weakenings” to produce aligned, lifetime-bound
+references to data with different properties. For example:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;UnsafeCell&amp;lt;MaybeUninit&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; is as close as we can get to a C++ &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&amp;amp;&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Option&amp;lt;&amp;amp;UnsafeCell&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; is a like a raw pointer, but to initialized memory.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Option&amp;lt;&amp;amp;mut MaybeUninit&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt; is like a raw pointer, but with alignment,
+aliasing, and lifetime requirements.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;UnsafeCell&amp;lt;&amp;amp;[T]&amp;gt;&lt;/code&gt; permits us to mutate the pointer to the buffer and its
+length, but not the values it points to themselves.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;UnsafeCell&amp;lt;&amp;amp;[UnsafeCell&amp;lt;T&amp;gt;]&amp;gt;&lt;/code&gt; lets us mutate both the buffer and its actual
+pointer/length.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Interestingly, there is no equivalent to a C++ raw pointer: there is no way
+to create a guaranteed-aligned pointer without a designated lifetime&lt;sup id=&quot;fnref:unsafe-lifetime&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:unsafe-lifetime&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;13&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;other-pointers&quot;&gt;&lt;a href=&quot;#other-pointers&quot;&gt;Other Pointers&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Rust and C++ have many other pointer types, such as smart pointers. However, in
+both languages, both are built in terms of these basic pointer types. Hopefully
+this article is a useful reference for anyone writing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; abstraction that
+wishes to avoid using raw pointers when possible.&lt;/p&gt;
+&lt;div class=&quot;footnotes&quot; role=&quot;doc-endnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:go-nuts&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;Except in Go, which synthesizes vtables &lt;em&gt;on the fly&lt;/em&gt;. Story for another day. &lt;a href=&quot;#fnref:go-nuts&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:unaligned&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;It is, apparently, a little-known fact that constructing unaligned pointers,
+but then never dereferencing them, is still UB in C++. C++ could, for
+example, store information in the lower bits of such a pointer. The
+in-memory representation of a pointer is actually unspecified! &lt;a href=&quot;#fnref:unaligned&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:unaligned-access&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;This is useful when paired with the Rust &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;*const T&amp;gt;::read_unaligned()&lt;/code&gt;
+function, which can be compiled down to a normal load on architectures that
+do not have alignment restrictions, like x86_64 and aarch64. &lt;a href=&quot;#fnref:unaligned-access&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:strict-aliasing&quot; role=&quot;doc-endnote&quot;&gt;
+      &lt;p&gt;Another story for another time. &lt;a href=&quot;#fnref:strict-aliasing&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:std-span&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;Comparable to the C++20 &lt;a href=&quot;https://en.cppreference.com/w/cpp/container/span&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;std::span&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/a&gt;
+type. &lt;a href=&quot;#fnref:std-span&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:usize&quot; role=&quot;doc-endnote&quot;&gt;
+      &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usize&lt;/code&gt; is Rust’s machine word type, compare &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;std::uintptr_t&lt;/code&gt;. &lt;a href=&quot;#fnref:usize&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:ptr-len&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;The length of a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*mut [T]&lt;/code&gt; can be accessed via the unstable
+&lt;a href=&quot;https://doc.rust-lang.org/std/primitive.pointer.html#method.len-1&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;*mut [T]&amp;gt;::len()&lt;/code&gt;&lt;/a&gt;
+method. &lt;a href=&quot;#fnref:ptr-len&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:raw-vtable&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;It is also not a type I have encountered enough to have much knowledge on.
+For example, I don’t actually know if the vtable half of a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*mut dyn Tr&lt;/code&gt;
+must always be valid or not; I suspect the answer is “no”, but I couldn’t
+find a citation for this. &lt;a href=&quot;#fnref:raw-vtable&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:but-you-cannot-free-it&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;Note that you &lt;em&gt;cannot&lt;/em&gt; continue to use a reference to freed, zero-sized
+memory. This subtle distinction is called out in
+&lt;a href=&quot;https://doc.rust-lang.org/std/ptr/index.html#safety&quot;&gt;https://doc.rust-lang.org/std/ptr/index.html#safety&lt;/a&gt;. &lt;a href=&quot;#fnref:but-you-cannot-free-it&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:requires-transmute&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;Currently, a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;transmute&lt;/code&gt; must be used to perform this operation, but I see
+no reason way this would permit us to perform an illegal mutation without
+uttering &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; a second time. In particular, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MaybeUninit::assume_init_read()&lt;/code&gt;,
+which could be used to perform illegal copies, is an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; function. &lt;a href=&quot;#fnref:requires-transmute&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:covariance&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;A covariant type &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Cov&amp;lt;T&amp;gt;&lt;/code&gt; is once where, if &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;T&lt;/code&gt; is a subtype of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;U&lt;/code&gt;, then
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Cov&amp;lt;T&amp;gt;&lt;/code&gt; is a subtype of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Cov&amp;lt;U&amp;gt;&lt;/code&gt;. This isn’t particularly noticeable in
+Rust, where the only subtyping relationships are &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;'a T&lt;/code&gt; subtypes &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;'b T&lt;/code&gt;
+when &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'a&lt;/code&gt; outlives &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'b&lt;/code&gt;, but is nonetheless important for advanced type
+design. &lt;a href=&quot;#fnref:covariance&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:but-thread-safety&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Cell&amp;lt;T&amp;gt;&lt;/code&gt; does not provide synchronization; you still need locks to share it
+between threads. &lt;a href=&quot;#fnref:but-thread-safety&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:unsafe-lifetime&quot; role=&quot;doc-endnote&quot;&gt;
+
+      &lt;p&gt;I have previously proposed a sort of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'unsafe&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'!&lt;/code&gt; “lifetime” that is
+intended to be the lifetime of dangling references (a bit of an oxymoron).
+This would allow us to express this concept, but I need to flesh out the
+concept more. &lt;a href=&quot;#fnref:unsafe-lifetime&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content><author><name>Miguel Young de la Sota</name></author><category term="c++" /><category term="rust" /><category term="pointers" /><summary type="html">Writing unsafe in Rust usually involves manual management of memory. Although, ideally, we’d like to exclusively use references for this, sometimes the constraints they apply are too strong. This post is a guide on those constraints and how to weaken them for correctness.</summary></entry><entry><title type="html">Move Constructors in Rust: Is it possible?</title><link href="https://mcyoung.xyz/https://mcyoung.xyz/2021/04/26/move-ctors/" rel="alternate" type="text/html" title="Move Constructors in Rust: Is it possible?" /><published>2021-04-26T00:00:00-04:00</published><updated>2021-04-26T00:00:00-04:00</updated><id>https://mcyoung.xyz/https://mcyoung.xyz/2021/04/26/move-ctors</id><content type="html" xml:base="https://mcyoung.xyz/https://mcyoung.xyz/2021/04/26/move-ctors/">&lt;p&gt;I’ve been told I need to write this idea down – I figure this one’s a good
 enough excuse to start one of them programming blogs.&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;TL;DR&lt;/em&gt; You &lt;em&gt;can&lt;/em&gt; move-constructors the Rust! It requires a few macros but isn’t
