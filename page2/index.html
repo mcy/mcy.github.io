@@ -150,14 +150,12 @@ into its type system.</p>
 <p>Rust has an ok<sup id="fnref:bindgen" role="doc-noteref"><a href="#fn:bindgen" class="footnote" rel="footnote">2</a></sup> FFI story for C:</p>
 
 <div class="code-multicol">
+
   <figure class="highlight" pretty-lang="C"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">into_rust</span><span class="p">();</span>
 
 <span class="kt">void</span> <span class="nf">into_c</span><span class="p">()</span> <span class="p">{</span>
   <span class="n">into_rust</span><span class="p">();</span>
-<span class="p">}</span>
-
-
- </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
   <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="nf">into_c</span><span class="p">();</span>
 <span class="p">}</span>
@@ -165,7 +163,7 @@ into its type system.</p>
 <span class="nd">#[no_mangle]</span>
 <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">into_rust</span><span class="p">()</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="p">{</span> <span class="nf">into_c</span><span class="p">()</span> <span class="p">}</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 </div>
 
 <p>Calling into either of these functions from the Rust or C side will recurse
@@ -191,6 +189,7 @@ Some types require calling a <em>move constructor</em>, or may not be moveable a
 <p>Even more alarming, C++ types are permited to take the address of the location
 where they are being constructed: the <code class="language-plaintext highlighter-rouge">this</code> pointer is always accessible,
 allowing easy creation of self-referential types:</p>
+
 <figure class="highlight" pretty-lang="C++"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Cyclic</span> <span class="p">{</span>
  <span class="nl">public:</span>
   <span class="n">Cyclic</span><span class="p">()</span> <span class="p">{}</span>
@@ -204,7 +203,7 @@ allowing easy creation of self-referential types:</p>
 
  <span class="nl">private:</span>
   <span class="n">Cyclic</span><span class="o">*</span> <span class="n">ptr_</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-<span class="p">};</span> </code></pre></figure>
+<span class="p">};</span></code></pre></figure>
 
 <p>The solution <a href="https://cxx.rs/"><code class="language-plaintext highlighter-rouge">cxx</code></a> and other FFI strategies take is to box up complex C++
 objects across the FFI boundary; a <code class="language-plaintext highlighter-rouge">std::unique_ptr&lt;Cyclic&gt;</code> (perhaps
@@ -289,7 +288,7 @@ is best illustraced by the <a href="https://en.cppreference.com/w/cpp/language/n
 
 <figure class="highlight" pretty-lang="C++"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">void</span> <span class="nf">MakeString</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">*</span> <span class="n">out</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">new</span> <span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"mwahahaha"</span><span class="p">);</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>Placement-<code class="language-plaintext highlighter-rouge">new</code> is one of those exotic C++ operations you only ever run into
 deep inside fancy library code. Unlike <code class="language-plaintext highlighter-rouge">new</code>, which triggers a trip into the
@@ -301,6 +300,7 @@ constructor: given a memory location and arguments, construct a new value.</p>
 This is not the case in C++; a member function has an altogether different type,
 but some simple template metaprogramming can flatten it back into a regular old
 free function:</p>
+
 <figure class="highlight" pretty-lang="C++"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
   <span class="kt">int</span> <span class="n">Bar</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">);</span>
 <span class="p">};</span>
@@ -310,9 +310,10 @@ free function:</p>
 <span class="p">}</span>
 
 <span class="n">Foo</span> <span class="n">foo</span><span class="p">;</span>
-<span class="n">FreeBar</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span> </code></pre></figure>
+<span class="n">FreeBar</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span></code></pre></figure>
 
 <p>Placement-<code class="language-plaintext highlighter-rouge">new</code> lets us do the analogous thing for a constructor:</p>
+
 <figure class="highlight" pretty-lang="C++"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
   <span class="n">Foo</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">);</span>
 <span class="p">}</span>
@@ -322,14 +323,15 @@ free function:</p>
 <span class="p">}</span>
 
 <span class="n">Foo</span><span class="o">*</span> <span class="n">foo</span> <span class="o">=</span> <span class="n">AllocateSomehow</span><span class="p">();</span>
-<span class="n">FreeFoo</span><span class="p">(</span><span class="o">*</span><span class="n">foo</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span> </code></pre></figure>
+<span class="n">FreeFoo</span><span class="p">(</span><span class="o">*</span><span class="n">foo</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span></code></pre></figure>
 
 <p>We can lift this “flattening” of a specific constructor into Rust, using the
 existing vocabulary for pushing fixed-address memory around:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">unsafe</span> <span class="k">trait</span> <span class="n">Ctor</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">ctor</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">MaybeUninit</span><span class="o">&lt;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span><span class="p">);</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>A <code class="language-plaintext highlighter-rouge">Ctor</code> is a <em>constructing closure</em>. A <code class="language-plaintext highlighter-rouge">Ctor</code> contains the necessary
 information for constructing a value of type <code class="language-plaintext highlighter-rouge">Output</code> which will live at the
@@ -340,9 +342,10 @@ making <code class="language-plaintext highlighter-rouge">*dest</code> become in
 an <code class="language-plaintext highlighter-rouge">Iterator</code> which contain the necessary captured values to perform the
 operation. A Rust type that is constructed using a <code class="language-plaintext highlighter-rouge">Ctor</code> would have functions
 like this:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span> <span class="n">MyType</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="nf">new</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="k">impl</span> <span class="n">Ctor</span><span class="o">&lt;</span><span class="n">Output</span> <span class="o">=</span> <span class="n">Self</span><span class="o">&gt;</span><span class="p">;</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>The <code class="language-plaintext highlighter-rouge">unsafe</code> markers serve distinct purposes:</p>
 <ul>
@@ -360,6 +363,7 @@ behavior of “<code class="language-plaintext highlighter-rouge">this</code>-st
 
 <p>Unfortunately, <code class="language-plaintext highlighter-rouge">Ctor</code> is covered in <code class="language-plaintext highlighter-rouge">unsafe</code>, and doesn’t even allocate storage
 for us. Luckily, it’s not too hard to build our own safe <code class="language-plaintext highlighter-rouge">std::make_unique</code>:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">make_box</span><span class="o">&lt;</span><span class="n">C</span><span class="p">:</span> <span class="n">Ctor</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">C</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Pin</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nn">Ctor</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="p">{</span>
     <span class="k">type</span> <span class="n">T</span> <span class="o">=</span> <span class="nn">Ctor</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
@@ -383,12 +387,13 @@ for us. Luckily, it’s not too hard to build our own safe <code class="language
     <span class="c">// earlier.</span>
     <span class="nn">Pin</span><span class="p">::</span><span class="nf">new_unchecked</span><span class="p">(</span><span class="nn">Box</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="n">uninit</span><span class="py">.cast</span><span class="p">::</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()))</span>
   <span class="p">}</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>Thus, <code class="language-plaintext highlighter-rouge">std::make_unique&lt;MyType&gt;()</code> in C++ becomes <code class="language-plaintext highlighter-rouge">make_box(MyType::new())</code> in
 Rust. <code class="language-plaintext highlighter-rouge">Ctor::ctor</code> gives us a bridging point to call the C++ constructor from
 Rust, in a context where its expectations are respected. For example, we might
 write the following binding code:</p>
+
 <figure class="highlight" pretty-lang="C++" file-name="foo.cc"><pre><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">Foo</span> <span class="p">{</span>
   <span class="n">Foo</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">);</span>
 <span class="p">}</span>
@@ -398,7 +403,8 @@ write the following binding code:</p>
 <span class="c1">// possible.</span>
 <span class="k">extern</span> <span class="s">"C"</span> <span class="n">FooCtor</span><span class="p">(</span><span class="n">Foo</span><span class="o">*</span> <span class="n">thiz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">new</span> <span class="p">(</span><span class="n">thiz</span><span class="p">)</span> <span class="n">Foo</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
+
 <figure class="highlight" pretty-lang="Rust" file-name="foo_bindings.rs"><pre><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="n">Foo</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
 <span class="k">impl</span> <span class="n">Foo</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">impl</span> <span class="n">Ctor</span><span class="o">&lt;</span><span class="n">Output</span> <span class="o">=</span> <span class="n">Self</span><span class="o">&gt;</span> <span class="p">{</span>
@@ -415,11 +421,12 @@ write the following binding code:</p>
       <span class="p">})</span>
     <span class="p">}</span>
   <span class="p">}</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
+
 <figure class="highlight" pretty-lang="Rust" file-name="foo_user.rs"><pre><code class="language-rust" data-lang="rust"><span class="k">use</span> <span class="nn">foo_bindings</span><span class="p">::</span><span class="n">Foo</span><span class="p">;</span>
 
 <span class="c">// Lo, behold! A C++ type on the Rust heap!</span>
-<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="nf">make_box</span><span class="p">(</span><span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">5</span><span class="p">));</span> </code></pre></figure>
+<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="nf">make_box</span><span class="p">(</span><span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">5</span><span class="p">));</span></code></pre></figure>
 
 <p>But… we’re still on the heap, so we seem to have made no progress. We could
 have just called <code class="language-plaintext highlighter-rouge">std::make_unique</code> on the C++ side and shunted it over to Rust.
@@ -431,6 +438,7 @@ In particular, this is what <a href="https://cxx.rs/"><code class="language-plai
 <code class="language-plaintext highlighter-rouge">Box::pin()</code> allows us to safely create a <code class="language-plaintext highlighter-rouge">Pin&lt;Box&lt;T&gt;&gt;</code>, since we know it will
 never move, much like the <code class="language-plaintext highlighter-rouge">make_box()</code> example above. However, it’s not possible
 to create a <code class="language-plaintext highlighter-rouge">Pin&lt;&amp;mut T&gt;</code> to not-necessarilly-<code class="language-plaintext highlighter-rouge">Unpin</code> data as easilly:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">let</span> <span class="k">mut</span> <span class="n">data</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
 <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">data</span><span class="p">;</span>
 <span class="k">let</span> <span class="n">pinned</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
@@ -439,35 +447,38 @@ to create a <code class="language-plaintext highlighter-rouge">Pin&lt;&amp;mut T
 <span class="p">};</span>
 
 <span class="c">// Once `pinned` goes out of scope, we can move out of `*ptr`!</span>
-<span class="k">let</span> <span class="n">moved</span> <span class="o">=</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span> </code></pre></figure>
+<span class="k">let</span> <span class="n">moved</span> <span class="o">=</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span></code></pre></figure>
 
 <p>The <code class="language-plaintext highlighter-rouge">unsafe</code> block is necessary because of exactly this situation: <code class="language-plaintext highlighter-rouge">&amp;mut T</code> does
 not own its pointee, and a given mutable reference might not be the “oldest”
 mutable reference there is. The following <em>is</em> a safe usage of this constructor:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">let</span> <span class="k">mut</span> <span class="n">data</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
 <span class="c">// Intentionally shadow `data` so that no longer-lived reference than</span>
 <span class="c">// the pinned one can be created.</span>
 <span class="k">let</span> <span class="n">data</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
   <span class="nn">Pin</span><span class="p">::</span><span class="nf">new_unchecked</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
-<span class="p">};</span> </code></pre></figure>
+<span class="p">};</span></code></pre></figure>
 
 <p>This is such a common pattern in futures code that many futures libraries
 provide a macro for performing this kind of pinning on behalf of the user, such
 as <a href="https://docs.rs/tokio/1.4.0/tokio/macro.pin.html"><code class="language-plaintext highlighter-rouge">tokio::pin!()</code></a>.</p>
 
 <p>With this in hand, we can actually call a constructor on a stack-pinned value:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">uninit</span><span class="p">();</span>
 <span class="nd">pin!</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
 <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="nf">.ctor</span><span class="p">(</span><span class="n">val</span><span class="p">);</span> <span class="p">}</span>
 <span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
   <span class="n">val</span><span class="nf">.map_unchecked_mut</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="n">x</span><span class="nf">.as_mut_ptr</span><span class="p">())</span>
-<span class="p">};</span> </code></pre></figure>
+<span class="p">};</span></code></pre></figure>
 
 <p>Unfortunately, we <em>still</em> need to utter a little bit more <code class="language-plaintext highlighter-rouge">unsafe</code>, but because
 of <code class="language-plaintext highlighter-rouge">Ctor</code>’s guarantees, this is all perfectly safe; the compiler just can’t
 guarantee it on its own. The natural thing to do is to wrap it up in a macro
 much like <code class="language-plaintext highlighter-rouge">pin!</code>, which we’ll call <code class="language-plaintext highlighter-rouge">emplace!</code>:</p>
-<figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="nd">emplace!</span><span class="p">(</span><span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">args</span><span class="p">));</span> </code></pre></figure>
+
+<figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="nd">emplace!</span><span class="p">(</span><span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">args</span><span class="p">));</span></code></pre></figure>
 
 <p>This is <em>truly</em> analogous to C++ stack initialization, such as <code class="language-plaintext highlighter-rouge">Foo val(args);</code>,
 although the type of <code class="language-plaintext highlighter-rouge">val</code> is <code class="language-plaintext highlighter-rouge">Pin&lt;&amp;mut Foo&gt;</code>, whereas in C++ it would merely
@@ -478,19 +489,20 @@ the Rust side needs to use <code class="language-plaintext highlighter-rouge">Pi
 
 <p>Now we go to build our Foo-returning function and are immediately hit with a
 roadblock:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">make_foo</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="nv">'wat</span> <span class="k">mut</span> <span class="n">Foo</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="nd">emplace!</span><span class="p">(</span><span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">args</span><span class="p">));</span>
   <span class="n">foo</span>
-<span class="p">}</span>
- </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 <p>What is the lifetime <code class="language-plaintext highlighter-rouge">'wat</code>? This is just returning a pointer to the current
 stack frame, which is no good. In C++ (ignoring fussy defails about move
 semantics), NRVO would kick in and <code class="language-plaintext highlighter-rouge">val</code> would be constructed “in the return
 slot”:</p>
+
 <figure class="highlight" pretty-lang="C++"><pre><code class="language-cpp" data-lang="cpp"><span class="n">Foo</span> <span class="nf">MakeFoo</span><span class="p">()</span> <span class="p">{</span>
   <span class="n">Foo</span> <span class="n">val</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
   <span class="k">return</span> <span class="n">val</span><span class="p">;</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p><a href="https://en.cppreference.com/w/cpp/language/copy_elision"><em>Return value optimization</em></a> (and the related <em>named return value
 optimization</em>) allow C++ to elide copies when constructing return values. Instead of
@@ -510,15 +522,17 @@ passed on the stack unconditionally<sup id="fnref:unique-ptr-inefficiency" role=
 <p>Since we can’t get at the return slot, we’ll make our own! We just
 need to pass the pinned <code class="language-plaintext highlighter-rouge">MaybeUninit&lt;T&gt;</code> memory that we would pass into
 <code class="language-plaintext highlighter-rouge">Ctor::ctor</code> as a “fake return slot”:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">make_foo</span><span class="p">(</span><span class="n">return_slot</span><span class="p">:</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">MaybeUninit</span><span class="o">&lt;</span><span class="n">Foo</span><span class="o">&gt;&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">Foo</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="p">{</span>
     <span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="nf">.ctor</span><span class="p">(</span><span class="n">return_slot</span><span class="p">);</span>
     <span class="n">val</span><span class="nf">.map_unchecked_mut</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="n">x</span><span class="nf">.as_mut_ptr</span><span class="p">());</span>
   <span class="p">}</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>This is such a common operation that it makes sense to replace
 <code class="language-plaintext highlighter-rouge">Pin&lt;&amp;mut MaybeUninit&lt;T&gt;&gt;</code> with a specific type, <code class="language-plaintext highlighter-rouge">Slot&lt;'a, T&gt;</code>:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="n">Slot</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="k">mut</span> <span class="n">MaybeUninit</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">);</span>
 <span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">Slot</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="n">emplace</span><span class="o">&lt;</span><span class="n">C</span><span class="p">:</span> <span class="n">Ctor</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">C</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="k">mut</span> <span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
@@ -531,13 +545,14 @@ need to pass the pinned <code class="language-plaintext highlighter-rouge">Maybe
 
 <span class="k">fn</span> <span class="nf">make_foo</span><span class="p">(</span><span class="n">return_slot</span><span class="p">:</span> <span class="n">Slot</span><span class="o">&lt;</span><span class="n">Foo</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">Foo</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="n">return_slot</span><span class="nf">.emplace</span><span class="p">(</span><span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>We can provide another macro, <code class="language-plaintext highlighter-rouge">slot!()</code>, which reserves pinned space on the
 stack much like <code class="language-plaintext highlighter-rouge">emplace!()</code> does, but without the construction step. Calling
 <code class="language-plaintext highlighter-rouge">make_foo</code> only requires minimal ceremony and no user-level <code class="language-plaintext highlighter-rouge">unsafe</code>.</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="nd">slot!</span><span class="p">(</span><span class="n">foo</span><span class="p">);</span>
-<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="nf">make_foo</span><span class="p">(</span><span class="n">foo</span><span class="p">);</span> </code></pre></figure>
+<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="nf">make_foo</span><span class="p">(</span><span class="n">foo</span><span class="p">);</span></code></pre></figure>
 
 <p>The <code class="language-plaintext highlighter-rouge">slot!()</code> macro is almost identical to <a href="https://docs.rs/tokio/1.4.0/tokio/macro.pin.html"><code class="language-plaintext highlighter-rouge">tokio::pin!()</code></a>, except that it
 doesn’t initialize the stack space with an existing value.</p>
@@ -551,13 +566,15 @@ equivalent for, so we’ll attack the easier version: copy constructors.</p>
 allowed to inspect the address of <code class="language-plaintext highlighter-rouge">*this</code>. Its sole argument is a <code class="language-plaintext highlighter-rouge">const T&amp;</code>,
 which has a direct Rust analogue: a <code class="language-plaintext highlighter-rouge">&amp;T</code>. Let’s write up a trait that captures
 this operation:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">unsafe</span> <span class="k">trait</span> <span class="n">CopyCtor</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">copy_ctor</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Self</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">MaybeUninit</span><span class="o">&lt;</span><span class="n">Self</span><span class="o">&gt;&gt;</span><span class="p">);</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>Unlike <code class="language-plaintext highlighter-rouge">Ctor</code>, we would implement <code class="language-plaintext highlighter-rouge">CopyCtor</code> on the type with the copy
 constructor, bridging it to C++ as before. We can then define a helper that
 builds a <code class="language-plaintext highlighter-rouge">Ctor</code> for us:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="k">copy</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">CopyCtor</span><span class="o">&gt;</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">impl</span> <span class="n">Ctor</span><span class="o">&lt;</span><span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="p">{</span>
     <span class="nn">ctor</span><span class="p">::</span><span class="nf">from_placement_fn</span><span class="p">(</span><span class="k">move</span> <span class="p">|</span><span class="n">dest</span><span class="p">|</span> <span class="p">{</span>
@@ -567,7 +584,7 @@ builds a <code class="language-plaintext highlighter-rouge">Ctor</code> for us:<
 <span class="p">}</span>
 
 <span class="nd">emplace!</span><span class="p">(</span><span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="k">copy</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>     <span class="c">// Calls the copy constructor.</span>
-<span class="k">let</span> <span class="n">boxed</span> <span class="o">=</span> <span class="nf">make_box</span><span class="p">(</span><span class="k">copy</span><span class="p">(</span><span class="n">y</span><span class="p">));</span> <span class="c">// Copy onto the heap. </span></code></pre></figure>
+<span class="k">let</span> <span class="n">boxed</span> <span class="o">=</span> <span class="nf">make_box</span><span class="p">(</span><span class="k">copy</span><span class="p">(</span><span class="n">y</span><span class="p">));</span> <span class="c">// Copy onto the heap.</span></code></pre></figure>
 
 <p>We can could (modulo orphan rules) even implement <code class="language-plaintext highlighter-rouge">CopyCtor</code> for Rust types 
 that implement <code class="language-plaintext highlighter-rouge">Clone</code> by <code class="language-plaintext highlighter-rouge">clone</code>ing into the destination.</p>
@@ -618,11 +635,12 @@ satisfy these conditions. After all, a <code class="language-plaintext highlight
 even if they can’t be moved.</p>
 
 <p>It’s useful to introduce some traits that record these requirements:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">unsafe</span> <span class="k">trait</span> <span class="n">OuterDrop</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">outer_drop</span><span class="p">(</span><span class="n">this</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">Self</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="k">unsafe</span> <span class="k">trait</span> <span class="n">DerefMove</span><span class="p">:</span> <span class="n">DerefMut</span> <span class="o">+</span> <span class="n">OuterDrop</span> <span class="p">{}</span> </code></pre></figure>
+<span class="k">unsafe</span> <span class="k">trait</span> <span class="n">DerefMove</span><span class="p">:</span> <span class="n">DerefMut</span> <span class="o">+</span> <span class="n">OuterDrop</span> <span class="p">{}</span></code></pre></figure>
 
 <p><code class="language-plaintext highlighter-rouge">OuterDrop</code> is simply the “outer storage destruction” operation. Naturally, it
 is only safe to perform this operation when the pointee’s own destructor has
@@ -633,6 +651,7 @@ pointee, too).</p>
 <p><code class="language-plaintext highlighter-rouge">DerefMove</code><sup id="fnref:deref-move-proposals" role="doc-noteref"><a href="#fn:deref-move-proposals" class="footnote" rel="footnote">7</a></sup> is the third requirement, which the compiler
 cannot check (there’s a lot of these, huh?). Any type which implements
 <code class="language-plaintext highlighter-rouge">DerefMove</code> can be moved out of by carefully dismantling the pointer:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">move_out_of</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="p">(</span><span class="k">mut</span> <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">P</span><span class="p">::</span><span class="n">Target</span>
 <span class="k">where</span>
   <span class="n">P</span><span class="p">:</span> <span class="n">DerefMove</span><span class="p">,</span>
@@ -655,7 +674,7 @@ cannot check (there’s a lot of these, huh?). Any type which implements
     <span class="c">// Return the moved pointee, which will be trivially NRVO'ed.</span>
     <span class="n">val</span>
   <span class="p">}</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>Much like pinning, we need to lift this capability to the stack somehow.
 <code class="language-plaintext highlighter-rouge">&amp;mut T</code> won’t cut it here.</p>
@@ -687,12 +706,13 @@ differently and does not provide the pinning guarantees we need.)</p>
 
 <p>This is it. The moment we’ve all be waiting for. Behold, the definition of a
 move constructor in Rust:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">unsafe</span> <span class="k">trait</span> <span class="n">MoveCtor</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">move_ctor</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Self</span><span class="p">,</span>
     <span class="n">dest</span><span class="p">:</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">MaybeUninit</span><span class="o">&lt;</span><span class="n">Self</span><span class="o">&gt;&gt;</span>
   <span class="p">);</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <blockquote>
   <p>Wait, that’s it?</p>
@@ -702,6 +722,7 @@ move constructor in Rust:</p>
 <code class="language-plaintext highlighter-rouge">drop()</code>, we have to use a plain ol’ <code class="language-plaintext highlighter-rouge">&amp;mut</code> instead. Like <code class="language-plaintext highlighter-rouge">Drop</code>, and like
 <code class="language-plaintext highlighter-rouge">CopyCtor</code>, this function is not called directly by users; instead, we provide
 an adaptor that takes in a <code class="language-plaintext highlighter-rouge">MoveCtor</code> and spits out a <code class="language-plaintext highlighter-rouge">Ctor</code>.</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">mov</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="p">(</span><span class="k">mut</span> <span class="n">ptr</span><span class="p">:</span> <span class="n">P</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">impl</span> <span class="n">Ctor</span><span class="o">&lt;</span><span class="n">Output</span> <span class="o">=</span> <span class="nn">P</span><span class="p">::</span><span class="n">Target</span><span class="o">&gt;</span>
 <span class="k">where</span>
   <span class="n">P</span><span class="p">:</span> <span class="n">DerefMove</span><span class="p">,</span>
@@ -718,14 +739,15 @@ an adaptor that takes in a <code class="language-plaintext highlighter-rouge">Mo
       <span class="nn">P</span><span class="p">::</span><span class="nf">outer_drop</span><span class="p">(</span><span class="n">inner</span><span class="p">);</span>
     <span class="p">})</span>
   <span class="p">}</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>Notice that we no longer require that <code class="language-plaintext highlighter-rouge">P::Target: Unpin</code>, since the
 <code class="language-plaintext highlighter-rouge">ptr::read()</code> call from <code class="language-plaintext highlighter-rouge">move_out_of()</code> is now gone. Instead, we need to make a
 specific requirement of <code class="language-plaintext highlighter-rouge">MoveCtor</code> that I will explain shortly. However, we can
 now freely call the move constructor just like any other <code class="language-plaintext highlighter-rouge">Ctor</code>:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="nd">emplace!</span><span class="p">(</span><span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="nf">mov</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>  <span class="c">// Calls the move constructor.</span>
-<span class="k">let</span> <span class="n">boxed</span> <span class="o">=</span> <span class="nf">make_box</span><span class="p">(</span><span class="nf">mov</span><span class="p">(</span><span class="n">y</span><span class="p">));</span>  <span class="c">// Move onto the heap. </span></code></pre></figure>
+<span class="k">let</span> <span class="n">boxed</span> <span class="o">=</span> <span class="nf">make_box</span><span class="p">(</span><span class="nf">mov</span><span class="p">(</span><span class="n">y</span><span class="p">));</span>  <span class="c">// Move onto the heap.</span></code></pre></figure>
 
 <h2 id="the-langauge-lawyering-part"><a href="#the-langauge-lawyering-part">The Langauge-Lawyering Part</a></h2>
 
@@ -797,6 +819,7 @@ Async WG will have to point out if there are any holes.</p>
 <p>In the end, we don’t <em>just</em> have a move constructors story, but a story for all
 kinds of construction, C++-style. Not only that, but we have almost natural
 syntax:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="nd">emplace!</span> <span class="p">{</span>
   <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
   <span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="nn">ctor</span><span class="p">::</span><span class="nf">mov</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
@@ -805,7 +828,7 @@ syntax:</p>
 
 <span class="c">// The make_box() example above can be added to `Box` through</span>
 <span class="c">// an extension trait.</span>
-<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="nn">Box</span><span class="p">::</span><span class="nf">emplace</span><span class="p">(</span><span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">());</span> </code></pre></figure>
+<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="nn">Box</span><span class="p">::</span><span class="nf">emplace</span><span class="p">(</span><span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">());</span></code></pre></figure>
 <p>As far as I can tell, having some kind of “magic” around stack emplacement
 is unavoidable; this is a place where the language is unlikely to give us
 enough flexibility any time soon, though this concept of constructors is the
@@ -814,6 +837,7 @@ first step towards such a thing.</p>
 <p>We can call into C++ from Rust without any heap allocations at all (though
 maybe wasting an instruction or two shunting pointers across registers for
 our not-RVO):</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="c">/// Generated Rust type for bridging to C++, like you might get from `cxx`.</span>
 <span class="k">struct</span> <span class="n">Foo</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
 <span class="k">impl</span> <span class="n">Foo</span> <span class="p">{</span>
@@ -825,7 +849,7 @@ our not-RVO):</p>
   <span class="k">let</span> <span class="k">mut</span> <span class="n">foo</span> <span class="o">=</span> <span class="n">out</span><span class="nf">.emplace</span><span class="p">(</span><span class="nn">Foo</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">42</span><span class="p">));</span>
   <span class="n">foo</span><span class="nf">.as_mut</span><span class="p">()</span><span class="nf">.set_x</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
   <span class="n">foo</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>For when dealing with slots explicitly is too much work, types can just be
 <code class="language-plaintext highlighter-rouge">ctor::mov</code>ed into a <code class="language-plaintext highlighter-rouge">Box</code> with <code class="language-plaintext highlighter-rouge">Box::emplace</code>.</p>

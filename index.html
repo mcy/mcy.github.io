@@ -165,10 +165,11 @@ borrow-checker). References are short-lived.</p>
 
 <p>C++ uses non-nullness to its advantage. For example, Clang will absolutely
 delete code of the form</p>
+
 <figure class="highlight" pretty-lang="C++"><pre><code class="language-cpp" data-lang="cpp"><span class="k">auto</span><span class="o">&amp;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">x</span> <span class="o">==</span> <span class="nb">nullptr</span><span class="p">)</span> <span class="p">{</span>
   <span class="n">DoSomething</span><span class="p">();</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>Because references cannot be null, and dereferencing the null pointer is always
 UB, the compiler may make this fairly strong assumption.</p>
@@ -209,6 +210,7 @@ equivalent to a C <code class="language-plaintext highlighter-rouge">T* restrict
 <p>Unlike C++, which has two almost-identical pointer types, Rust’s two pointer
 types provide either no guarantees or <em>all</em> of them. The following <code class="language-plaintext highlighter-rouge">unsafe</code>
 operations are all UB:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">let</span> <span class="n">null</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;*</span><span class="nn">ptr</span><span class="p">::</span><span class="nf">null</span><span class="p">()</span> <span class="p">};</span>
 
 <span class="c">// A reference to u8 need not be sufficiently aligned</span>
@@ -229,7 +231,7 @@ operations are all UB:</p>
 <span class="c">// the same memory. This would also be fine in C++!</span>
 <span class="k">let</span> <span class="k">mut</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="k">let</span> <span class="n">p1</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;*</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">y</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">i32</span><span class="p">)</span> <span class="p">};</span>
-<span class="k">let</span> <span class="n">p2</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;*</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">y</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">i32</span><span class="p">)</span> <span class="p">};</span> </code></pre></figure>
+<span class="k">let</span> <span class="n">p2</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;*</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">y</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">i32</span><span class="p">)</span> <span class="p">};</span></code></pre></figure>
 
 <h3 id="wide-pointers"><a href="#wide-pointers">Wide Pointers</a></h3>
 
@@ -269,9 +271,10 @@ to relax:</p>
 
 <p>The last three of these properties are irrelevant for a zero-sized type. For
 example, we can generate infinite <code class="language-plaintext highlighter-rouge">&amp;mut ()</code> with no consequences:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">unique_unit</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="k">mut</span> <span class="p">()</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="p">(</span><span class="mi">0x1</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="p">())</span> <span class="p">}</span> 
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>We materialize a non-null, well-aligned pointer and reborrow it into a static
 reference; because there is no data to point to, none of the usual worries about
@@ -281,9 +284,10 @@ is<sup id="fnref:but-you-cannot-free-it" role="doc-noteref"><a href="#fn:but-you
 
 <p>This also applies to empty slices; in fact, the compiler will happily promote
 the expression <code class="language-plaintext highlighter-rouge">&amp;mut []</code> to an arbitrary lifetime:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">unique_empty</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="k">mut</span> <span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="p">{</span>
   <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[]</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <h3 id="null-references"><a href="#null-references">Null References</a></h3>
 
@@ -291,25 +295,27 @@ the expression <code class="language-plaintext highlighter-rouge">&amp;mut []</c
 this is ABI-compatible with a C pointer <code class="language-plaintext highlighter-rouge">const T*</code>, with <code class="language-plaintext highlighter-rouge">Option::&lt;&amp;T&gt;::None</code>
 being a null pointer on the C side. This “null pointer optimization” applies to
 any type recursively containing at least one <code class="language-plaintext highlighter-rouge">T&amp;</code>.</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="nf">DoSomething</span><span class="p">(</span><span class="n">ptr</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="nb">u32</span><span class="o">&gt;</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">fn</span> <span class="nf">do_something</span><span class="p">()</span> <span class="p">{</span>
   <span class="nf">DoSomething</span><span class="p">(</span><span class="nb">None</span><span class="p">);</span>  <span class="c">// C will see a `NULL` as the argument.</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <p>The same effect can be achieved for a pointer type using the
 <a href="https://doc.rust-lang.org/std/ptr/struct.NonNull.html"><code class="language-plaintext highlighter-rouge">NonNull&lt;T&gt;</code></a> standard
 library type: <code class="language-plaintext highlighter-rouge">Option&lt;NonNull&lt;T&gt;&gt;</code> is identical to <code class="language-plaintext highlighter-rouge">*mut T</code>. This is most
 beneficial for types which would otherwise contain a raw pointer:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="n">ptr</span><span class="p">:</span> <span class="n">NonNull</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
   <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
   <span class="n">cap</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="nd">assert_eq!</span><span class="p">(</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">u8</span><span class="o">&gt;&gt;</span><span class="p">(),</span> <span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">u8</span><span class="o">&gt;&gt;&gt;</span><span class="p">())</span> </code></pre></figure>
+<span class="nd">assert_eq!</span><span class="p">(</span><span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">u8</span><span class="o">&gt;&gt;</span><span class="p">(),</span> <span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">u8</span><span class="o">&gt;&gt;&gt;</span><span class="p">())</span></code></pre></figure>
 
 <h3 id="uninitialized-pointee"><a href="#uninitialized-pointee">Uninitialized Pointee</a></h3>
 
@@ -317,8 +323,9 @@ beneficial for types which would otherwise contain a raw pointer:</p>
 is free to assume it may read such references at any time with no consequences.</p>
 
 <p>The following classic C pattern is verboten:</p>
+
 <figure class="highlight" pretty-lang="C"><pre><code class="language-c" data-lang="c"><span class="n">Foo</span> <span class="n">foo</span><span class="p">;</span>
-<span class="n">initialize_foo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">foo</span><span class="p">);</span> </code></pre></figure>
+<span class="n">initialize_foo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">foo</span><span class="p">);</span></code></pre></figure>
 
 <p>Rust doesn’t provide any particularly easy ways to allocate memory without
 initializing it, too, so this usually isn’t a problem. The
@@ -342,9 +349,10 @@ entitled<sup id="fnref:requires-transmute" role="doc-noteref"><a href="#fn:requi
 initialized converting it to a <code class="language-plaintext highlighter-rouge">&amp;MaybeUninit&lt;T&gt;</code>. This makes sense because <code class="language-plaintext highlighter-rouge">&amp;T</code>
 is covariant<sup id="fnref:covariance" role="doc-noteref"><a href="#fn:covariance" class="footnote" rel="footnote">11</a></sup> in <code class="language-plaintext highlighter-rouge">&amp;T</code>. However, this is not true of <code class="language-plaintext highlighter-rouge">&amp;mut T</code>, since
 it’s not covariant:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">let</span> <span class="k">mut</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="k">let</span> <span class="n">uninit</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">MaybeUninit</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nf">transmute</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">x</span><span class="p">)</span> <span class="p">};</span>
-<span class="o">*</span><span class="n">uninit</span> <span class="o">=</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">uninit</span><span class="p">();</span>  <span class="c">// Oops, `x` is now uninit! </span></code></pre></figure>
+<span class="o">*</span><span class="n">uninit</span> <span class="o">=</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">uninit</span><span class="p">();</span>  <span class="c">// Oops, `x` is now uninit!</span></code></pre></figure>
 
 <p>These types are useful for talking to C++ without giving up too many guarantees.
 <code class="language-plaintext highlighter-rouge">Option&lt;&amp;MaybeUninit&lt;T&gt;&gt;</code> is an almost perfect model of a <code class="language-plaintext highlighter-rouge">const T*</code>, under the
@@ -352,6 +360,7 @@ assumption that most pointers in C++ are valid most of the time.</p>
 
 <p><code class="language-plaintext highlighter-rouge">MaybeUninit&lt;T&gt;</code> also finds use in working with raw blocks of memory, such as in
 a <code class="language-plaintext highlighter-rouge">Vec</code>-style growable slice:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="n">SliceVec</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="c">// Backing memory. The first `len` elements of it are</span>
   <span class="c">// known to be initialized, but no more than that.</span>
@@ -366,7 +375,7 @@ a <code class="language-plaintext highlighter-rouge">Vec</code>-style growable s
     <span class="k">self</span><span class="py">.data</span><span class="p">[</span><span class="k">self</span><span class="py">.len</span><span class="p">]</span> <span class="o">=</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
     <span class="k">self</span><span class="py">.len</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
   <span class="p">}</span>
-<span class="p">}</span> </code></pre></figure>
+<span class="p">}</span></code></pre></figure>
 
 <h3 id="aliased-pointee"><a href="#aliased-pointee">Aliased Pointee</a></h3>
 
@@ -397,6 +406,7 @@ because we can mutate through it, it is a much closer analogue to a C++ <code cl
 However, because <code class="language-plaintext highlighter-rouge">&amp;T</code> assumes the pointee is never mutated, it cannot coexist
 with a <code class="language-plaintext highlighter-rouge">&amp;UnsafeCell&lt;T&gt;</code> to the same memory, if mutation is performed through it.
 The following is explicitly UB:</p>
+
 <figure class="highlight" pretty-lang="Rust"><pre><code class="language-rust" data-lang="rust"><span class="k">let</span> <span class="k">mut</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="k">let</span> <span class="n">p</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>
 
@@ -405,7 +415,7 @@ The following is explicitly UB:</p>
 <span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">transmute</span><span class="p">::</span><span class="o">&lt;</span><span class="mi">_</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UnsafeCell</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="p">};</span>
 
 <span class="c">// But writing to it does!</span>
-<span class="n">q</span><span class="nf">.get</span><span class="p">()</span><span class="nf">.write</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span> </code></pre></figure>
+<span class="n">q</span><span class="nf">.get</span><span class="p">()</span><span class="nf">.write</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span></code></pre></figure>
 
 <p>The <code class="language-plaintext highlighter-rouge">Cell&lt;T&gt;</code> type is useful for non-aliasing references to plain-old-data types,
 which tend to be <code class="language-plaintext highlighter-rouge">Copy</code>. It allows us to perform mutation without having to

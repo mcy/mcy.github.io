@@ -116,15 +116,44 @@ h5[id] > a:hover,
 h6[id] > a:hover
 {
   text-decoration: none;
+  display: list-item;
 }
 
-h2[id] > a:hover::after,
-h3[id] > a:hover::after,
-h4[id] > a:hover::after,
-h5[id] > a:hover::after,
-h6[id] > a:hover::after
+h2[id] > a:hover::marker,
+h3[id] > a:hover::marker,
+h4[id] > a:hover::marker,
+h5[id] > a:hover::marker,
+h6[id] > a:hover::marker
 {
-  content: ' #';
+  content: '#  ';
+}
+
+h2[id] > a:hover,
+h3[id] > a:hover,
+h4[id] > a:hover,
+h5[id] > a:hover,
+h6[id] > a:hover
+{
+  text-decoration: none;
+  display: list-item;
+}
+
+blockquote h2[id] > a:hover::marker,
+blockquote h3[id] > a:hover::marker,
+blockquote h4[id] > a:hover::marker,
+blockquote h5[id] > a:hover::marker,
+blockquote h6[id] > a:hover::marker
+{
+  content: none;
+}
+
+blockquote h2[id] > a:hover::after,
+blockquote h3[id] > a:hover::after,
+blockquote h4[id] > a:hover::after,
+blockquote h5[id] > a:hover::after,
+blockquote h6[id] > a:hover::after
+{
+  content: '  #';
 }
 
 /* Body text */
@@ -156,8 +185,7 @@ hr {
   position: relative;
   margin: 1.5rem 0;
   border: 0;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #fff;
+  border-top: 2px solid #eee;
 }
 
 abbr {
@@ -253,11 +281,14 @@ blockquote {
   margin: .8rem 0;
   color: #bbb;
   background-color: #202020;
-  border-left: .25rem solid #e5e5e5;
+  border-left: .25rem solid #999;
   padding-right: 2rem;
 }
 blockquote p:last-child {
   margin-bottom: 0;
+}
+blockquote :first-child {
+  margin-top: 0;
 }
 @media (min-width: 30em) {
   blockquote {
@@ -294,6 +325,25 @@ tbody tr:nth-child(odd) th {
   background-color: #202020;
 }
 
+div.footnotes {
+  counter-reset: footnotes;
+  padding-top: 1.5rem;
+  border: 0;
+  border-top: 2px solid #eee;
+}
+
+div.footnotes li {
+  counter-increment: footnotes;
+}
+
+div.footnotes li:not(:first-child) {
+  padding-top: 1rem;
+  border-top: 2px solid #666;
+}
+
+div.footnotes li::marker {
+  content: counter(footnotes) "   ";
+}
 
 /*
  * Custom type
@@ -405,7 +455,7 @@ tbody tr:nth-child(odd) th {
 .related {
   padding-top: 2rem;
   padding-bottom: 2rem;
-  border-top: 1px solid #eee;
+  border-top: 2px solid #eee;
 }
 .related-posts {
   padding-left: 0;
