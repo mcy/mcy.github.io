@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en-us">
-
   <head>
   <link href="http://gmpg.org/xfn/11" rel="profile">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,9 +15,8 @@
   </title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="https://mcyoung.xyz/public/css/poole.css">
   <link rel="stylesheet" href="https://mcyoung.xyz/public/css/syntax.css">
-  <link rel="stylesheet" href="https://mcyoung.xyz/public/css/hyde.css">
+  <link rel="stylesheet" href="https://mcyoung.xyz/public/css/style.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
 
   <!-- Icons -->
@@ -30,24 +28,24 @@
 
 
   <body>
-
     <div class="sidebar">
-  <image src="https://mcyoung.xyz/public/avatar.png"
-    alt="Yeah, I drew this. Check out my art blog."
-    class="hide-if-mobile"
-  />
+  <a href="https://mcyoung.xyz/">
+    <image src="https://mcyoung.xyz/public/avatar.png"
+      alt="Yeah, I drew this. Check out my art blog."
+      class="hide-if-mobile"
+    />
+  </a>
+
   <div class="container sidebar-sticky">
     <div class="sidebar-about">
-      <h1>
-        <a href="https://mcyoung.xyz/">
+      <h1><a href="https://mcyoung.xyz/">
           mcyoung
-        </a>
-      </h1>
-      <p class="lead">I'm Miguel. I write about questionable C++ and Rust code. I also have an art blog linked below.
+      </a></h1>
+      <p class="lead hide-if-mobile">I'm Miguel. I write about questionable C++ and Rust code. I also have an art blog linked below.
 </p>
     </div>
 
-    <hr/>
+    <hr class="hide-if-mobile"/>
     <nav class="sidebar-nav">
       <a class="sidebar-nav-item" href="https://mcyoung.xyz/">Home</a>
 
@@ -88,10 +86,6 @@
       
         
       
-        
-          
-        
-      
     </nav>
 
     <nav class="sidebar-nav">
@@ -101,38 +95,37 @@
       <a class="sidebar-nav-item" href="https://mcyoung.xyz/public/resume.pdf">Resumé</a>
     </nav>
     <br/>
-    <p>
-      &copy; 2021 Miguel Young de la Sota
-      <br/>
-      <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA</a>
-    </p>
+    <p class="hide-if-mobile">&copy; 2021 Miguel Young de la Sota
+<br/>
+<a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA</a></p>
   </div>
 </div>
-
-
-    <div class="content container">
-      <div class="page">
+    <div class="content container"><div class="page">
   <h1 class="page-title">Posts</h1>
   <ul>
   
-      <li>
-      <a href="/2021/05/24/ptr-taxonomy/">
-        <small class="post-meta-flat">2021-05-24</small>
-        The Taxonomy of Pointers
-      </a>
+      <li> <a href="/2021/05/24/ptr-taxonomy/">
+  <small class="post-meta-flat">2021-05-24</small>
+  The Taxonomy of Pointers
+</a>
   
-      <li>
-      <a href="/2021/04/26/move-ctors/">
-        <small class="post-meta-flat">2021-04-26</small>
-        Move Constructors in Rust:
+      <li> <a href="/2021/04/26/move-ctors/">
+  <small class="post-meta-flat">2021-04-26</small>
+  Move Constructors in Rust:
 Is it possible?
 
-      </a>
+</a>
   
 </ul>
 </div>
-
-    </div>
-
+</div>
   </body>
+
+  <div class="sidebar show-if-mobile">
+    <div class="container sidebar-sticky">
+      <p>&copy; 2021 Miguel Young de la Sota
+<br/>
+<a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA</a></p>
+    </div>
+  </div>
 </html>
