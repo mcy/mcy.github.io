@@ -328,16 +328,16 @@ div.footnotes {
   border-top: 2px solid #eee;
 }
 
-div.footnotes li {
+div.footnotes ol > li {
   counter-increment: footnotes;
 }
 
-div.footnotes li:not(:first-child) {
+div.footnotes ol > li:not(:first-child) {
   padding-top: 1rem;
   border-top: 2px solid #666;
 }
 
-div.footnotes li::marker {
+div.footnotes ol > li::marker {
   content: counter(footnotes) "   ";
 }
 
