@@ -234,16 +234,20 @@ figure.highlight {
   margin-bottom: 1rem;
   background-color: #181818;
   border-radius: 10px;
+  position: relative;
 }
 /* Wrap some code fences in a <div class="code-multicol"> to cause them to be
    rendered side-by-side. */
 .code-multicol {
   display: flex;
   justify-content: space-around;
+  column-gap: .5rem;
+  width: 100%;
 }
 .code-multicol > figure {
-  flex-basis: 49%;
+  flex-basis: 50%;
   flex-grow: 0;
+  min-width: 0;
 }
 
 /* Render a language type in the lower-left corner of a corner fence, using
@@ -260,10 +264,10 @@ figure.highlight {
 
   font-size: .6rem;
 
-  position: relative;
+  position: absolute;
   float: right;
-  right: .4em;
-  bottom: 2.3em;
+  right: .5em;
+  bottom: .5em;
 }
 /* If a file name is specified on a code fence using {:file-name="foo.cc"} after
    it, render that instead of the language. */
@@ -353,11 +357,27 @@ div.footnotes ol > li:not(:first-child) {
 }
 
 div.footnotes ol > li::marker {
-  content: counter(footnotes) "   ";
+  content: "(" counter(footnotes) ")   ";
+}
+
+@media (max-width: 48em) {
+  div.footnotes ol > li::marker {
+    content: "";
+  }
+  div.footnotes ol > li > p:first-child::before {
+    content: "(" counter(footnotes) ") ";
+    display: inline-block;
+    white-space: pre;
+  }
 }
 
 div.footnotes ol {
   padding: 0;
+}
+
+.reversefootnote {
+  color: inherit;
+  float: right;
 }
 
 /** Deprecated stuff? **/
