@@ -1,0 +1,13 @@
+Publish the linker script post
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Tue Jun 1 12:33:04 2021 -0400
+#
+# On branch master
+# Your branch is up to date with 'origin/master'.
+#
+# Changes to be committed:
+#	renamed:    _wip/linker-script.md -> _posts/2021-06-01-linker-script.md
+#
