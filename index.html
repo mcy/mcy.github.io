@@ -43,8 +43,9 @@
 
 <span class="k">impl</span> <span class="n">Allocator</span> <span class="k">for</span> <span class="n">Arena</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">alloc</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">align</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span> <span class="p">{</span>
-    <span class="c">// To get an aligned pointer, we need to burn some "alignment padding".</span>
-    <span class="c">// This is one of the places where alignment is annoying.</span>
+    <span class="c">// To get an aligned pointer, we need to burn some "alignment</span>
+    <span class="c">// padding". This is one of the places where alignment is</span>
+    <span class="c">// annoying.</span>
     <span class="k">let</span> <span class="n">needed</span> <span class="o">=</span> <span class="n">size</span> <span class="o">+</span> <span class="nf">misalign</span><span class="p">(</span><span class="k">self</span><span class="py">.heap</span><span class="nf">.as_ptr</span><span class="p">(),</span> <span class="n">align</span><span class="p">);</span>
 
     <span class="c">// Check that we're not out of memory.</span>
@@ -52,7 +53,8 @@
       <span class="k">return</span> <span class="nn">ptr</span><span class="p">::</span><span class="nf">null_mut</span><span class="p">();</span>
     <span class="p">}</span>
 
-    <span class="c">// Advance the cursor and cut off the end of the allocated section.</span>
+    <span class="c">// Advance the cursor and cut off the end of the allocated</span>
+    <span class="c">// section.</span>
     <span class="k">self</span><span class="py">.cursor</span> <span class="o">+=</span> <span class="n">needed</span><span class="p">;</span>
     <span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="py">.heap</span><span class="p">[</span><span class="k">self</span><span class="py">.cursor</span> <span class="o">-</span> <span class="n">size</span><span class="p">]</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">;</span>
   <span class="p">}</span>
@@ -130,10 +132,10 @@
      Block--------------------------+
      | null | prev | data data data |
      +------------------------------+</code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Text</div></div></div> <p>We also introduce a <code class="language-plaintext highlighter-rouge">List</code> container type that holds the root node of a list of blocks, to give us a convenient container-like API. This type looks like this:</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="n">List</span> <span class="p">{</span>
-  <span class="c">/// The root is actually a sacrificial block that exists only to make it</span>
-  <span class="c">/// possible to unlink blocks in the middle of a list. This needs to exist so</span>
-  <span class="c">/// that calling unlink() on the "first" element of the list has a predecessor</span>
-  <span class="c">/// to replace itself with.</span>
+  <span class="c">/// The root is actually a sacrificial block that exists only to</span>
+  <span class="c">/// make it possible to unlink blocks in the middle of a list. This</span>
+  <span class="c">/// needs to exist so that calling unlink() on the "first" element</span>
+  <span class="c">/// of the list has a predecessor to replace itself with.</span>
   <span class="n">root</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="n">Block</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -194,7 +196,7 @@
 +---------------------------------------+ |
 | Pd | Pd | Pd | Pd | Pd | Pd | Pd | Pd | /
 +---------------------------------------+  &lt;-- Heap base address
-| Page 0                                | \    = region base + 0x7c1f400
+| Page 0                                | \    = region + 0x7c1f400
 |                                       | |
 |                                       | |--- 4K pages corresponding
 +---------------------------------------+ |    to the Pds above.
