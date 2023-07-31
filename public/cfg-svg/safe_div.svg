@@ -8,8 +8,8 @@
  viewBox="0.00 0.00 327.00 198.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 194)">
 <title>CFG for &#39;safe_div&#39; function</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-194 323,-194 323,4 -4,4"/>
-<text text-anchor="middle" x="159.5" y="-7.8" font-family="Times,serif" font-size="14.00">CFG for &#39;safe_div&#39; function</text>
+<!--<polygon fill="white" stroke="transparent" points="-4,4 -4,-194 323,-194 323,4 -4,4"/>
+<text text-anchor="middle" x="159.5" y="-7.8" font-family="Times,serif" font-size="14.00">CFG for &#39;safe_div&#39; function</text>-->
 <!-- Node0x1dd3260 -->
 <g id="node1" class="node">
 <title>Node0x1dd3260</title>

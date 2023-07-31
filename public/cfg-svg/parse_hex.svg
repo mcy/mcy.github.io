@@ -8,8 +8,8 @@
  viewBox="0.00 0.00 942.00 1183.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1179)">
 <title>CFG for &#39;parse_hex&#39; function</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-1179 938,-1179 938,4 -4,4"/>
-<text text-anchor="middle" x="467" y="-7.8" font-family="Times,serif" font-size="14.00">CFG for &#39;parse_hex&#39; function</text>
+<!--<polygon fill="white" stroke="transparent" points="-4,4 -4,-1179 938,-1179 938,4 -4,4"/>
+<text text-anchor="middle" x="467" y="-7.8" font-family="Times,serif" font-size="14.00">CFG for &#39;parse_hex&#39; function</text>-->
 <!-- Node0x1599530 -->
 <g id="node1" class="node">
 <title>Node0x1599530</title>
