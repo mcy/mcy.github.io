@@ -26,7 +26,7 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
   <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
   <span class="c">/// a length, and a pointer.</span>
-  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
     <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
@@ -80,7 +80,7 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="k">unsafe</span> <span class="p">{</span>
       <span class="c">// SAFETY: initialized either from uniquely-owned data,</span>
       <span class="c">// or borrowed data of lifetime 'a that outlives self.</span>
-      <span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8</span><span class="p">(</span><span class="k">self</span><span class="nf">.as_slice</span><span class="p">())</span>
+      <span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8_unchecked</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_slice</span><span class="p">())</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
@@ -91,9 +91,16 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
       <span class="k">let</span> <span class="n">dropped</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
         <span class="c">// SAFETY: This is just reconstituting the box we dismantled</span>
         <span class="c">// in Yarn::owned().</span>
-        <span class="nn">Box</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="k">self</span><span class="nf">.as_slice</span><span class="p">())</span>
+        <span class="nn">Box</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_mut_slice</span><span class="p">())</span>
       <span class="p">};</span>
     <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
+  <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice_mut</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
+    <span class="c">// Same thing as as_slice, basically. This is just to make</span>
+    <span class="c">// Box::from_raw() above typecheck.</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>This gives us a type that strongly resembles <code class="language-plaintext highlighter-rouge">Cow&lt;str&gt;</code> with only half of the bytes. We can even write code to extend the lifetime of a <code class="language-plaintext highlighter-rouge">Yarn</code>:</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="c">/// Removes the bound lifetime from the yarn, allocating if</span>
@@ -292,7 +299,7 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
   <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
   <span class="c">/// a length, and a pointer.</span>
-  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
     <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
@@ -346,7 +353,7 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="k">unsafe</span> <span class="p">{</span>
       <span class="c">// SAFETY: initialized either from uniquely-owned data,</span>
       <span class="c">// or borrowed data of lifetime 'a that outlives self.</span>
-      <span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8</span><span class="p">(</span><span class="k">self</span><span class="nf">.as_slice</span><span class="p">())</span>
+      <span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8_unchecked</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_slice</span><span class="p">())</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
@@ -357,9 +364,16 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
       <span class="k">let</span> <span class="n">dropped</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
         <span class="c">// SAFETY: This is just reconstituting the box we dismantled</span>
         <span class="c">// in Yarn::owned().</span>
-        <span class="nn">Box</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="k">self</span><span class="nf">.as_slice</span><span class="p">())</span>
+        <span class="nn">Box</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_mut_slice</span><span class="p">())</span>
       <span class="p">};</span>
     <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
+  <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice_mut</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
+    <span class="c">// Same thing as as_slice, basically. This is just to make</span>
+    <span class="c">// Box::from_raw() above typecheck.</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>This gives us a type that strongly resembles <code class="language-plaintext highlighter-rouge">Cow&lt;str&gt;</code> with only half of the bytes. We can even write code to extend the lifetime of a <code class="language-plaintext highlighter-rouge">Yarn</code>:</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="c">/// Removes the bound lifetime from the yarn, allocating if</span>
