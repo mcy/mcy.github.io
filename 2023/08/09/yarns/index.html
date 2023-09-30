@@ -1,7 +1,7 @@
-<!DOCTYPE html> <html lang="en-us"> <head> <link href="http://gmpg.org/xfn/11" rel="profile"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta http-equiv="content-type" content="text/html; charset=utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"> <title> I Wrote A String Type &middot; mcyoung </title> <link rel="stylesheet" href="https://mcyoung.xyz/public/css/syntax.css"> <link rel="stylesheet" href="https://mcyoung.xyz/public/css/syntax-overrides.css"> <link rel="stylesheet" href="https://mcyoung.xyz/public/css/style.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"> <link rel="shortcut icon" href="https://mcyoung.xyz/public/favicon.ico"> <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml"> <script src="https://mcyoung.xyz/public/js/minimap.js"></script> <meta name="twitter:card" content="summary_large_image"> <meta name="twitter:title" content="I Wrote A String Type &middot; mcyoung"> <meta name="twitter:image" content="https://mcyoung.xyz/og/yarns-cf3a9d1c27dded926f781e030067666be9a1b045.png"> <meta property="og:title" content="I Wrote A String Type &middot; mcyoung"> <meta property="og:type" content="object"> <meta property="og:image" content="https://mcyoung.xyz/og/yarns-cf3a9d1c27dded926f781e030067666be9a1b045.png"> <meta property="og:height" content="630"> <meta property="og:width" content="1200"> <meta property="og:url" content="https://mcyoung.xyz/2023/08/09/yarns/"> <script data-goatcounter="https://mcy.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script> </head> <body> <div class="sidebar"> <a href="https://mcyoung.xyz/"> <img src="https://mcyoung.xyz/public/avatar.png" alt="Yeah, I drew this. Check out my art blog." class="hide-if-mobile"/> </a> <div class="container sidebar-sticky"> <div class="sidebar-about"> <h1><a href="https://mcyoung.xyz/"> mcyoung </a></h1> <p class="lead hide-if-mobile">I'm Miguel. I write about compilers, performance, and silly computer things. I also draw Pokémon. </p> </div> <hr class="hide-if-mobile"/> <nav class="sidebar-nav"> <a class="sidebar-nav-item" href="https://mcyoung.xyz/">Home</a> • <a class="sidebar-nav-item" href="/about.html">About</a> • <a class="sidebar-nav-item" href="/posts.html">Posts</a> • <a class="sidebar-nav-item" href="/tags.html">Tags</a> </nav> <nav class="sidebar-nav"> <a class="sidebar-nav-item" href="https://art.mcyoung.xyz/">Art</a> • <a class="sidebar-nav-item" href="https://github.com/mcy">GH</a> • <a class="sidebar-nav-item" href="https://mcyoung.xyz/resume">Resumé</a> </nav> <br class="hide-if-mobile"/> <p class="hide-if-mobile">&copy; 2023 Miguel Young de la Sota <br/> <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA</a> • <a href="https://varz.mcyoung.xyz/">Site Analytics</a></p> </div> </div> <div class="content container"><div class="post"> <span class="post-meta"> <span> <a href="https://mcyoung.xyz/tags.html#dark-arts">#dark-arts</a> <a href="https://mcyoung.xyz/tags.html#pointers">#pointers</a> <a href="https://mcyoung.xyz/tags.html#rust">#rust</a> </span> <span> 2023-08-09 </span> </span> <h1 class="post-title"><a href="/2023/08/09/yarns/"> I Wrote A String Type<br/> </a></h1> <p>I write compilers for fun. I can’t help it. Consequently, I also write a lot of parsers. In systems programming, it’s usually a good idea to try to share memory rather than reuse it, so as such my AST types tend to look like this.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">pub</span> <span class="k">enum</span> <span class="n">Expr</span><span class="o">&lt;</span><span class="nv">'src</span><span class="o">&gt;</span> <span class="p">{</span>
+<!DOCTYPE html> <html lang="en-us"> <head> <link href="http://gmpg.org/xfn/11" rel="profile"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta http-equiv="content-type" content="text/html; charset=utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"> <title> I Wrote A String Type &middot; mcyoung </title> <link rel="stylesheet" href="https://mcyoung.xyz/public/css/syntax.css"> <link rel="stylesheet" href="https://mcyoung.xyz/public/css/syntax-overrides.css"> <link rel="stylesheet" href="https://mcyoung.xyz/public/css/style.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"> <link rel="shortcut icon" href="https://mcyoung.xyz/public/favicon.ico"> <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml"> <script src="https://mcyoung.xyz/public/js/minimap.js"></script> <script data-goatcounter="https://mcy.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script> <meta name="twitter:card" content="summary_large_image"> <meta name="twitter:title" content="I Wrote A String Type &middot; mcyoung"> <meta name="twitter:image" content="https://mcyoung.xyz/og/yarns-cf3a9d1c27dded926f781e030067666be9a1b045.png"> <meta property="og:title" content="I Wrote A String Type &middot; mcyoung"> <meta property="og:type" content="object"> <meta property="og:image" content="https://mcyoung.xyz/og/yarns-cf3a9d1c27dded926f781e030067666be9a1b045.png"> <meta property="og:height" content="630"> <meta property="og:width" content="1200"> <meta property="og:url" content="https://mcyoung.xyz/2023/08/09/yarns/"> </head> <body> <div class="sidebar"> <a href="https://mcyoung.xyz/"> <img src="https://mcyoung.xyz/public/avatar.png" alt="Yeah, I drew this. Check out my art blog." class="hide-if-mobile"/> </a> <div class="container sidebar-sticky"> <div class="sidebar-about"> <h1><a href="https://mcyoung.xyz/"> mcyoung </a></h1> <p class="lead hide-if-mobile">I'm Miguel. I write about compilers, performance, and silly computer things. I also draw Pokémon. </p> </div> <hr class="hide-if-mobile"/> <nav class="sidebar-nav"> <a class="sidebar-nav-item" href="https://mcyoung.xyz/">Home</a> • <a class="sidebar-nav-item" href="/about.html">About</a> • <a class="sidebar-nav-item" href="/posts.html">Posts</a> • <a class="sidebar-nav-item" href="/tags.html">Tags</a> </nav> <nav class="sidebar-nav"> <a class="sidebar-nav-item" href="https://art.mcyoung.xyz/">Art</a> • <a class="sidebar-nav-item" href="https://github.com/mcy">GH</a> • <a class="sidebar-nav-item" href="https://mcyoung.xyz/resume">Resumé</a> </nav> <br class="hide-if-mobile"/> <p class="hide-if-mobile">&copy; 2023 Miguel Young de la Sota <br/> <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA</a> • <a href="https://varz.mcyoung.xyz/">Site Analytics</a></p> </div> </div> <div class="content container"><div class="post"> <span class="post-meta"> <span> <a href="https://mcyoung.xyz/tags.html#dark-arts">#dark-arts</a> <a href="https://mcyoung.xyz/tags.html#pointers">#pointers</a> <a href="https://mcyoung.xyz/tags.html#rust">#rust</a> </span> <span> 2023-08-09 </span> </span> <h1 class="post-title"><a href="/2023/08/09/yarns/"> I Wrote A String Type<br/> </a></h1> <p>I write compilers for fun. I can’t help it. Consequently, I also write a lot of parsers. In systems programming, it’s usually a good idea to try to share memory rather than reuse it, so as such my AST types tend to look like this.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">pub</span> <span class="k">enum</span> <span class="n">Expr</span><span class="o">&lt;</span><span class="nv">'src</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="nf">Int</span><span class="p">(</span><span class="nb">u32</span><span class="p">)</span>
   <span class="nf">Ident</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">'src</span> <span class="nb">str</span><span class="p">),</span>
-  <span class="c">// ...</span>
+  <span class="c1">// ...</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>Whenever we parse an identifier, rather than copy its name into a fresh <code class="language-plaintext highlighter-rouge">String</code>, we borrow from the input source string. This avoids an extra allocation, an extra copy, and saves a word in the representation. Compilers can be memory-hungry, so it helps to pick a lean representation.</p> <p>Unfortunately, it’s not so easy for quoted strings. Most strings, like <code class="language-plaintext highlighter-rouge">"all my jelly babies"</code>, are “literally” in the original source, like an identifier. But strings with escapes aren’t: <code class="language-plaintext highlighter-rouge">\n</code> is encoded in the source code with the bytes <code class="language-plaintext highlighter-rouge">[0x5c, 0x6e]</code>, but the actual “decoded” value of a string literal replaces each escape with a single <code class="language-plaintext highlighter-rouge">0x0a</code>.</p> <p>The usual solution is a <a href="https://doc.rust-lang.org/std/borrow/enum.Cow.html"><code class="language-plaintext highlighter-rouge">Cow&lt;str&gt;</code></a>. In the more common, escape-less verison, we can use <code class="language-plaintext highlighter-rouge">Cow::Borrowed</code>, which avoids the extra allocation and copy, and in the escaped version, we decode the escapes into a <code class="language-plaintext highlighter-rouge">String</code> and wrap it in a <code class="language-plaintext highlighter-rouge">Cow::Owned</code>.</p> <p>For example, suppose that we’re writing a parser for a language that has quoted strings with escapes. The string <code class="language-plaintext highlighter-rouge">"all my jelly babies"</code> can be represented as a byte string that borrows the input source code, so we’d use the <code class="language-plaintext highlighter-rouge">Cow::Borrowed</code> variant. This is most strings in any language: escapes tend to be rare.</p> <p>For example, if we have the string <code class="language-plaintext highlighter-rouge">"not UTF-8 \xff"</code>, the actual byte string value is different from that in the source code.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-text" data-lang="text">// Bytes in the source.
 hex:   6e 6f 74 20 55 54 46 2d 38 20 5c 78 66 66
 ascii: n  o  t     U  T  F  -  8     \  x  f  f
@@ -24,10 +24,10 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="p">}</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
-  <span class="c">/// a length, and a pointer.</span>
-  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
-    <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
+  <span class="cd">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
+  <span class="cd">/// a length, and a pointer.</span>
+  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+    <span class="nd">assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">,</span>
@@ -35,62 +35,62 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the kind back out.</span>
+  <span class="cd">/// Extracts the kind back out.</span>
   <span class="k">fn</span> <span class="nf">kind</span><span class="p">(</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span> <span class="p">{</span>
     <span class="p">(</span><span class="k">self</span><span class="py">.len</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span> <span class="k">as</span> <span class="nb">u8</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the slice out (regardless of kind).</span>
+  <span class="cd">/// Extracts the slice out (regardless of kind).</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
     <span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="k">self</span><span class="py">.ptr</span><span class="p">,</span> <span class="p">(</span><span class="k">self</span><span class="py">.len</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>Note that I’ve made this type <code class="language-plaintext highlighter-rouge">Copy</code>, and some functions take it by value. This is for two reasons.</p> <ol> <li> <p>There is a type of <code class="language-plaintext highlighter-rouge">Yarn</code> that is itself <code class="language-plaintext highlighter-rouge">Copy</code>, although I’m not covering it in this article.</p> </li> <li> <p>It is a two-word struct, which means that on most architectures it is eligible to be passed in a pair of registers. Passing it by value in the low-level code helps promote keeping it in registers. This isn’t always possible, as we will see when we discuss “SSO”.</p> </li> </ol> <p>Let’s chose kind <code class="language-plaintext highlighter-rouge">0</code> to mean “this is borrowed data”, and kind <code class="language-plaintext highlighter-rouge">1</code> to be “this is heap-allocated data”. We can use this to remember whether we need to call a destructor.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">pub</span> <span class="k">struct</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="n">raw</span><span class="p">:</span> <span class="n">RawYarn</span><span class="p">,</span>
-  <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="k">const</span> <span class="n">BORROWED</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="k">const</span> <span class="n">HEAP</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 
 <span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">BORROWED</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Create a new yarn from owned data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from owned data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
     <span class="nn">mem</span><span class="p">::</span><span class="nf">forget</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">HEAP</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the data.</span>
+  <span class="cd">/// Extracts the data.</span>
   <span class="k">pub</span> <span class="k">fn</span> <span class="nf">as_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span>
     <span class="k">unsafe</span> <span class="p">{</span>
-      <span class="c">// SAFETY: initialized either from uniquely-owned data,</span>
-      <span class="c">// or borrowed data of lifetime 'a that outlives self.</span>
+      <span class="c1">// SAFETY: initialized either from uniquely-owned data,</span>
+      <span class="c1">// or borrowed data of lifetime 'a that outlives self.</span>
       <span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8_unchecked</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_slice</span><span class="p">())</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="k">impl</span> <span class="n">Drop</span> <span class="k">for</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="k">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">impl</span> <span class="nb">Drop</span> <span class="k">for</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="k">self</span><span class="py">.raw</span><span class="nf">.kind</span><span class="p">()</span> <span class="o">==</span> <span class="n">HEAP</span> <span class="p">{</span>
       <span class="k">let</span> <span class="n">dropped</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
-        <span class="c">// SAFETY: This is just reconstituting the box we dismantled</span>
-        <span class="c">// in Yarn::owned().</span>
+        <span class="c1">// SAFETY: This is just reconstituting the box we dismantled</span>
+        <span class="c1">// in Yarn::owned().</span>
         <span class="nn">Box</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_mut_slice</span><span class="p">())</span>
       <span class="p">};</span>
     <span class="p">}</span>
@@ -99,26 +99,26 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice_mut</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
-    <span class="c">// Same thing as as_slice, basically. This is just to make</span>
-    <span class="c">// Box::from_raw() above typecheck.</span>
+    <span class="c1">// Same thing as as_slice, basically. This is just to make</span>
+    <span class="c1">// Box::from_raw() above typecheck.</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>This gives us a type that strongly resembles <code class="language-plaintext highlighter-rouge">Cow&lt;str&gt;</code> with only half of the bytes. We can even write code to extend the lifetime of a <code class="language-plaintext highlighter-rouge">Yarn</code>:</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Removes the bound lifetime from the yarn, allocating if</span>
-  <span class="c">/// necessary.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">immortalize</span><span class="p">(</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'static</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="cd">/// Removes the bound lifetime from the yarn, allocating if</span>
+  <span class="cd">/// necessary.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">immortalize</span><span class="p">(</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="k">'static</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">if</span> <span class="k">self</span><span class="py">.raw</span><span class="nf">.kind</span><span class="p">()</span> <span class="o">==</span> <span class="n">BORROWED</span> <span class="p">{</span>
-      <span class="k">let</span> <span class="k">copy</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.as_slice</span><span class="p">()</span><span class="nf">.into</span><span class="p">();</span>
-      <span class="k">self</span> <span class="o">=</span> <span class="nn">Yarn</span><span class="p">::</span><span class="nf">owned</span><span class="p">(</span><span class="k">copy</span><span class="p">);</span>
+      <span class="k">let</span> <span class="n">copy</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.as_slice</span><span class="p">()</span><span class="nf">.into</span><span class="p">();</span>
+      <span class="k">self</span> <span class="o">=</span> <span class="nn">Yarn</span><span class="p">::</span><span class="nf">owned</span><span class="p">(</span><span class="n">copy</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="c">// We need to be careful that we discard the old yarn, since its</span>
-    <span class="c">// destructor may run and delete the heap allocation we created</span>
-    <span class="c">// above.</span>
+    <span class="c1">// We need to be careful that we discard the old yarn, since its</span>
+    <span class="c1">// destructor may run and delete the heap allocation we created</span>
+    <span class="c1">// above.</span>
     <span class="k">let</span> <span class="n">raw</span> <span class="o">=</span> <span class="k">self</span><span class="py">.raw</span><span class="p">;</span>
     <span class="nn">mem</span><span class="p">::</span><span class="nf">forget</span><span class="p">(</span><span class="k">self</span><span class="p">);</span>
-    <span class="nn">Yarn</span><span class="p">::</span><span class="o">&lt;</span><span class="nv">'static</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nn">Yarn</span><span class="p">::</span><span class="o">&lt;</span><span class="k">'static</span><span class="o">&gt;</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">,</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>The remaining two niches can be put to use for optimizing small strings.</p> <h2 id="small-string-optimization"><a href="#small-string-optimization">Small String Optimization</a></h2> <p>C++’s <code class="language-plaintext highlighter-rouge">std::string</code> also makes the “most strings are small” assumption. In the <code class="language-plaintext highlighter-rouge">libc++</code> implementation of the standard library, <code class="language-plaintext highlighter-rouge">std::string</code>s of up to 23 bytes never hit the heap!</p> <p>C++ implementations do this by using most of the pointer, length, and capacity fields as a storage buffer for small strings, the so-called “small string optimization” (SSO). In <code class="language-plaintext highlighter-rouge">libc++</code>, in SSO mode, a <code class="language-plaintext highlighter-rouge">std::string</code>’s length fits in one byte, so the other 23 bytes can be used as storage. The capacity isn’t stored at all: an SSO string always has a capacity of 23.</p> <p><code class="language-plaintext highlighter-rouge">RawYarn</code> still has another two niches, so let’s dedicate one to a “small” representation. In small mode, the kind will be 2, and only the 16th byte will be the length.</p> <p>This is why we used the two <em>high</em> bits of <code class="language-plaintext highlighter-rouge">len</code> for our scratch space: no matter what mode it’s in, we can easily extract these bits<sup id="fnref:big-endian" role="doc-noteref"><a href="#fn:big-endian" class="footnote" rel="footnote">5</a></sup>. Some of the existing <code class="language-plaintext highlighter-rouge">RawYarn</code> methods need to be updated, though.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="nd">#[repr(C)]</span>
@@ -131,11 +131,11 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="k">const</span> <span class="n">SMALL</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
-  <span class="c">/// a length, and a pointer.</span>
+  <span class="cd">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
+  <span class="cd">/// a length, and a pointer.</span>
   <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">SMALL</span><span class="p">);</span>
-    <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
+    <span class="nd">assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">:</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ptr</span><span class="p">),</span>
@@ -143,11 +143,11 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the slice out (regardless of kind).</span>
+  <span class="cd">/// Extracts the slice out (regardless of kind).</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
     <span class="k">let</span> <span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">adjust</span><span class="p">)</span> <span class="o">=</span> <span class="k">match</span> <span class="k">self</span><span class="nf">.kind</span><span class="p">()</span> <span class="p">{</span>
-      <span class="n">SMALL</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="n">Self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">8</span><span class="p">),</span>
-      <span class="mi">_</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span><span class="py">.ptr</span><span class="nf">.assume_init</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span>
+      <span class="n">SMALL</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="k">Self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">8</span><span class="p">),</span>
+      <span class="n">_</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span><span class="py">.ptr</span><span class="nf">.assume_init</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span>
     <span class="p">};</span>
 
     <span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="p">(</span><span class="k">self</span><span class="py">.len</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">adjust</span><span class="p">))</span>
@@ -155,24 +155,24 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>In the non-<code class="language-plaintext highlighter-rouge">SMALL</code> case, we shift twice as before, but in the <code class="language-plaintext highlighter-rouge">SMALL</code> case, we need to get the high byte of the <code class="language-plaintext highlighter-rouge">len</code> field, so we need to shift down by an additional <code class="language-plaintext highlighter-rouge">usize::BITS - 8</code>. No matter what we’ve scribbled on the low bytes of <code class="language-plaintext highlighter-rouge">len</code>, we will always get just the length this way.</p> <p>We also need to use a different pointer value depending on whether we’re in <code class="language-plaintext highlighter-rouge">SMALL</code> mode. This is why <code class="language-plaintext highlighter-rouge">as_slice</code> needs to take a reference argument, since the slice data may be <em>directly</em> in <code class="language-plaintext highlighter-rouge">self</code>!</p> <p>Also, <code class="language-plaintext highlighter-rouge">ptr</code> is a <code class="language-plaintext highlighter-rouge">MaybeUninit</code> now, which will become clear in the next code listing.</p> <p>We should also provide a way to construct small strings.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">const</span> <span class="n">SSO_LEN</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Create a new small yarn. `data` must be valid for `len` bytes</span>
-  <span class="c">/// and `len` must be smaller than `SSO_LEN`.</span>
+  <span class="cd">/// Create a new small yarn. `data` must be valid for `len` bytes</span>
+  <span class="cd">/// and `len` must be smaller than `SSO_LEN`.</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">from_small</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">RawYarn</span> <span class="p">{</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span><span class="p">);</span>
 
-    <span class="c">// Create a yarn with an uninitialized pointer value (!!)</span>
-    <span class="c">// and a length whose high byte is packed with `small` and</span>
-    <span class="c">// `len`.</span>
+    <span class="c1">// Create a yarn with an uninitialized pointer value (!!)</span>
+    <span class="c1">// and a length whose high byte is packed with `small` and</span>
+    <span class="c1">// `len`.</span>
     <span class="k">let</span> <span class="k">mut</span> <span class="n">yarn</span> <span class="o">=</span> <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">:</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">uninit</span><span class="p">(),</span>
       <span class="n">len</span><span class="p">:</span> <span class="p">(</span><span class="n">SMALL</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">&lt;&lt;</span> <span class="mi">6</span> <span class="p">|</span> <span class="n">len</span><span class="p">)</span>
           <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">8</span><span class="p">),</span>
     <span class="p">};</span>
 
-    <span class="c">// Memcpy the data to the new yarn.</span>
-    <span class="c">// We write directly onto the `yarn` variable. We won't</span>
-    <span class="c">// overwrite the high-byte length because `len` will</span>
-    <span class="c">// never be &gt;= 16.</span>
+    <span class="c1">// Memcpy the data to the new yarn.</span>
+    <span class="c1">// We write directly onto the `yarn` variable. We won't</span>
+    <span class="c1">// overwrite the high-byte length because `len` will</span>
+    <span class="c1">// never be &gt;= 16.</span>
     <span class="nn">ptr</span><span class="p">::</span><span class="nf">copy_nonoverlapping</span><span class="p">(</span>
       <span class="n">data</span><span class="p">,</span>
       <span class="o">&amp;</span><span class="k">mut</span> <span class="n">yarn</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="n">RawYarn</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">,</span>
@@ -182,30 +182,30 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="n">yarn</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>The precise maximum size of an SSO string is a bit more subtle than what’s given above, but it captures the spirit. The <code class="language-plaintext highlighter-rouge">RawYarn::from_small</code> illustrates why the pointer value is hidden in a <code class="language-plaintext highlighter-rouge">MaybeUninit</code>: we’re above to overwrite it with garbage, and in that case it won’t be a pointer at all.</p> <p>We can update our public <code class="language-plaintext highlighter-rouge">Yarn</code> type to use the new small representation whenever possible.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
 
     <span class="k">if</span> <span class="n">len</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="n">Self</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">Self</span> <span class="p">{</span>
         <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">)</span> <span class="p">},</span>
-        <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+        <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
       <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">BORROWED</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Create a new yarn from owned data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from owned data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">if</span> <span class="n">data</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="n">Self</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">Self</span> <span class="p">{</span>
         <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">data</span><span class="nf">.len</span><span class="p">(),</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">())</span> <span class="p">},</span>
-        <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+        <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
       <span class="p">}</span>
     <span class="p">}</span>
 
@@ -213,55 +213,55 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
     <span class="nn">mem</span><span class="p">::</span><span class="nf">forget</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">HEAP</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>It’s also possible to construct a <code class="language-plaintext highlighter-rouge">Yarn</code> directly from a character now, too!</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_char</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">char</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_char</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">char</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="k">mut</span> <span class="n">buf</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0u8</span><span class="p">;</span> <span class="mi">4</span><span class="p">];</span>
     <span class="k">let</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.encode_utf8</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">buf</span><span class="p">);</span>
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">)</span> <span class="p">},</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>(Note that we do not need to update <code class="language-plaintext highlighter-rouge">Yarn::immortalize()</code>; why?)</p> <p>What we have now is a maybe-owned string that does not require an allocation for small strings. However, we still have an extra niche…</p> <h2 id="string-constants"><a href="#string-constants">String Constants</a></h2> <p>String constants in Rust are interesting, because we can actually detect them at compile-time<sup id="fnref:leaks" role="doc-noteref"><a href="#fn:leaks" class="footnote" rel="footnote">6</a></sup>.</p> <p>We can use the last remaining niche, 3, to represent data that came from a string constant, which means that it does not need to be boxed to be immortalized.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">const</span> <span class="n">STATIC</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 
 <span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_static</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_static</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
 
     <span class="k">if</span> <span class="n">len</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="n">Self</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">Self</span> <span class="p">{</span>
         <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">)</span> <span class="p">},</span>
-        <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+        <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
       <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">STATIC</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>This function is identical to <code class="language-plaintext highlighter-rouge">Yarn::borrowed</code>, except that <code class="language-plaintext highlighter-rouge">data</code> most now have a static lifetime, and we pass <code class="language-plaintext highlighter-rouge">STATIC</code> to <code class="language-plaintext highlighter-rouge">RawYarn::from_raw_parts()</code>.</p> <p>Because of how we’ve written all of the prior code, this does not require any special support in <code class="language-plaintext highlighter-rouge">Yarn::immortalize()</code> or in the low-level <code class="language-plaintext highlighter-rouge">RawYarn</code> code.</p> <p>The actual <code class="language-plaintext highlighter-rouge">byteyarn</code> library provides a <code class="language-plaintext highlighter-rouge">yarn!()</code> macro that has the same syntax as <code class="language-plaintext highlighter-rouge">format!()</code>. This is the primary way in which yarns are created. It is has been carefully written so that <code class="language-plaintext highlighter-rouge">yarn!("this is a literal")</code> always produces a <code class="language-plaintext highlighter-rouge">STATIC</code> string, rather than a heap-allocated string.</p> <h2 id="an-extra-niche-as-a-treat"><a href="#an-extra-niche-as-a-treat">An extra niche, as a treat?</a></h2> <p>Unfortunately, because of how we’ve written it, <code class="language-plaintext highlighter-rouge">Option&lt;Yarn&gt;</code> is 24 bytes, a whole word larger than a <code class="language-plaintext highlighter-rouge">Yarn</code>. However, there’s still a little gap where we can fit the <code class="language-plaintext highlighter-rouge">None</code> variant. It turns out that because of how we’ve chosen the discriminants, <code class="language-plaintext highlighter-rouge">len</code> is zero if and only if it is an empty <code class="language-plaintext highlighter-rouge">BORROWED</code> string. But this is not the only zero: if the high byte is <code class="language-plaintext highlighter-rouge">0x80</code>, this is an empty <code class="language-plaintext highlighter-rouge">SMALL</code> string. If we simply require that no other empty string is ever constructed (by marking <code class="language-plaintext highlighter-rouge">RawYarn::from_raw_parts()</code> as unsafe and specifying it should not be passed a length of zero), we can guarantee that <code class="language-plaintext highlighter-rouge">len</code> is <em>never</em> zero.</p> <p>Thus, we can update <code class="language-plaintext highlighter-rouge">len</code> to be a <code class="language-plaintext highlighter-rouge">NonZeroUsize</code>.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="nd">#[repr(C)]</span>
 <span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
 <span class="k">struct</span> <span class="n">RawYarn</span> <span class="p">{</span>
   <span class="n">ptr</span><span class="p">:</span> <span class="n">MaybeUninit</span><span class="o">&lt;*</span><span class="k">mut</span> <span class="nb">u8</span><span class="o">&gt;</span><span class="p">,</span>
-  <span class="n">len</span><span class="p">:</span> <span class="n">NonZeroUsize</span><span class="p">,</span>  <span class="c">// (!!)</span>
+  <span class="n">len</span><span class="p">:</span> <span class="n">NonZeroUsize</span><span class="p">,</span>  <span class="c1">// (!!)</span>
 <span class="p">}</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
-  <span class="c">/// a *nonzero* length, and a pointer.</span>
+  <span class="cd">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
+  <span class="cd">/// a *nonzero* length, and a pointer.</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">SMALL</span><span class="p">);</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">);</span>
-    <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
+    <span class="nd">assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">:</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ptr</span><span class="p">),</span>
@@ -274,7 +274,7 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="n">ret</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">x86 Assembly</div></div></div> <p>If we want to play the byte-for-byte game, this costs 14 bytes when encoded in the Intel variable-length encoding. You would think that two shifts would result in marginally smaller code, but no, since the input comes in in <code class="language-plaintext highlighter-rouge">rdi</code> and needs to wind up in <code class="language-plaintext highlighter-rouge">rax</code>.</p> <p>On RISC-V, though, it seems to decide that two shifts is in fact cheaper, and will even optimize <code class="language-plaintext highlighter-rouge">x &amp; 0x3fff_ffff_ffff_ffff</code> back into two shifts. <a href="#fnref:two-shifts" class="reversefootnote" role="doc-backlink">&#8617;</a></p> </li> <li id="fn:big-endian" role="doc-endnote"> <p>This only works on little endian. Thankfully all computers are little endian. <a href="#fnref:big-endian" class="reversefootnote" role="doc-backlink">&#8617;</a></p> </li> <li id="fn:leaks" role="doc-endnote"> <p>Technically, a <code class="language-plaintext highlighter-rouge">&amp;'static str</code> may also point to leaked memory. For our purposes, there is no essential difference. <a href="#fnref:leaks" class="reversefootnote" role="doc-backlink">&#8617;</a></p> </li> </ol> </div> </div> <div class="related post-footer"> <h2>Related Posts</h2> <ul class="related-posts"> <li> <a href="/2023/09/29/what-is-a-matrix/"> <small class="post-meta-flat">2023-09-29</small> What is a Matrix? A Miserable Pile of Coefficients! </a> <li> <a href="/2023/08/01/llvm-ir/"> <small class="post-meta-flat">2023-08-01</small> A Gentle Introduction to LLVM IR </a> <li> <a href="/2023/05/11/sam-closures/"> <small class="post-meta-flat">2023-05-11</small> Single Abstract Method Traits </a> </ul> </div> <div class="minimap"> <div class="minimap-size"></div> <div class="minimap-controller"></div> <div class="minimap-content"> <div class="content container"> <div class="post"> <span class="post-meta"> <span> <a href="https://mcyoung.xyz/tags.html#dark-arts">#dark-arts</a> <a href="https://mcyoung.xyz/tags.html#pointers">#pointers</a> <a href="https://mcyoung.xyz/tags.html#rust">#rust</a> </span> <span> 2023-08-09 </span> </span> <h1 class="post-title"><a href="/2023/08/09/yarns/"> I Wrote A String Type<br/> </a></h1> <p>I write compilers for fun. I can’t help it. Consequently, I also write a lot of parsers. In systems programming, it’s usually a good idea to try to share memory rather than reuse it, so as such my AST types tend to look like this.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">pub</span> <span class="k">enum</span> <span class="n">Expr</span><span class="o">&lt;</span><span class="nv">'src</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="nf">Int</span><span class="p">(</span><span class="nb">u32</span><span class="p">)</span>
   <span class="nf">Ident</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">'src</span> <span class="nb">str</span><span class="p">),</span>
-  <span class="c">// ...</span>
+  <span class="c1">// ...</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>Whenever we parse an identifier, rather than copy its name into a fresh <code class="language-plaintext highlighter-rouge">String</code>, we borrow from the input source string. This avoids an extra allocation, an extra copy, and saves a word in the representation. Compilers can be memory-hungry, so it helps to pick a lean representation.</p> <p>Unfortunately, it’s not so easy for quoted strings. Most strings, like <code class="language-plaintext highlighter-rouge">"all my jelly babies"</code>, are “literally” in the original source, like an identifier. But strings with escapes aren’t: <code class="language-plaintext highlighter-rouge">\n</code> is encoded in the source code with the bytes <code class="language-plaintext highlighter-rouge">[0x5c, 0x6e]</code>, but the actual “decoded” value of a string literal replaces each escape with a single <code class="language-plaintext highlighter-rouge">0x0a</code>.</p> <p>The usual solution is a <a href="https://doc.rust-lang.org/std/borrow/enum.Cow.html"><code class="language-plaintext highlighter-rouge">Cow&lt;str&gt;</code></a>. In the more common, escape-less verison, we can use <code class="language-plaintext highlighter-rouge">Cow::Borrowed</code>, which avoids the extra allocation and copy, and in the escaped version, we decode the escapes into a <code class="language-plaintext highlighter-rouge">String</code> and wrap it in a <code class="language-plaintext highlighter-rouge">Cow::Owned</code>.</p> <p>For example, suppose that we’re writing a parser for a language that has quoted strings with escapes. The string <code class="language-plaintext highlighter-rouge">"all my jelly babies"</code> can be represented as a byte string that borrows the input source code, so we’d use the <code class="language-plaintext highlighter-rouge">Cow::Borrowed</code> variant. This is most strings in any language: escapes tend to be rare.</p> <p>For example, if we have the string <code class="language-plaintext highlighter-rouge">"not UTF-8 \xff"</code>, the actual byte string value is different from that in the source code.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-text" data-lang="text">// Bytes in the source.
 hex:   6e 6f 74 20 55 54 46 2d 38 20 5c 78 66 66
 ascii: n  o  t     U  T  F  -  8     \  x  f  f
@@ -297,10 +297,10 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="p">}</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
-  <span class="c">/// a length, and a pointer.</span>
-  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
-    <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
+  <span class="cd">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
+  <span class="cd">/// a length, and a pointer.</span>
+  <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+    <span class="nd">assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">,</span>
@@ -308,62 +308,62 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the kind back out.</span>
+  <span class="cd">/// Extracts the kind back out.</span>
   <span class="k">fn</span> <span class="nf">kind</span><span class="p">(</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span> <span class="p">{</span>
     <span class="p">(</span><span class="k">self</span><span class="py">.len</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span> <span class="k">as</span> <span class="nb">u8</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the slice out (regardless of kind).</span>
+  <span class="cd">/// Extracts the slice out (regardless of kind).</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
     <span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="k">self</span><span class="py">.ptr</span><span class="p">,</span> <span class="p">(</span><span class="k">self</span><span class="py">.len</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>Note that I’ve made this type <code class="language-plaintext highlighter-rouge">Copy</code>, and some functions take it by value. This is for two reasons.</p> <ol> <li> <p>There is a type of <code class="language-plaintext highlighter-rouge">Yarn</code> that is itself <code class="language-plaintext highlighter-rouge">Copy</code>, although I’m not covering it in this article.</p> </li> <li> <p>It is a two-word struct, which means that on most architectures it is eligible to be passed in a pair of registers. Passing it by value in the low-level code helps promote keeping it in registers. This isn’t always possible, as we will see when we discuss “SSO”.</p> </li> </ol> <p>Let’s chose kind <code class="language-plaintext highlighter-rouge">0</code> to mean “this is borrowed data”, and kind <code class="language-plaintext highlighter-rouge">1</code> to be “this is heap-allocated data”. We can use this to remember whether we need to call a destructor.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">pub</span> <span class="k">struct</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="n">raw</span><span class="p">:</span> <span class="n">RawYarn</span><span class="p">,</span>
-  <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="k">const</span> <span class="n">BORROWED</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="k">const</span> <span class="n">HEAP</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 
 <span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">BORROWED</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Create a new yarn from owned data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from owned data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
     <span class="nn">mem</span><span class="p">::</span><span class="nf">forget</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">HEAP</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the data.</span>
+  <span class="cd">/// Extracts the data.</span>
   <span class="k">pub</span> <span class="k">fn</span> <span class="nf">as_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span>
     <span class="k">unsafe</span> <span class="p">{</span>
-      <span class="c">// SAFETY: initialized either from uniquely-owned data,</span>
-      <span class="c">// or borrowed data of lifetime 'a that outlives self.</span>
+      <span class="c1">// SAFETY: initialized either from uniquely-owned data,</span>
+      <span class="c1">// or borrowed data of lifetime 'a that outlives self.</span>
       <span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8_unchecked</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_slice</span><span class="p">())</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="k">impl</span> <span class="n">Drop</span> <span class="k">for</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="k">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">impl</span> <span class="nb">Drop</span> <span class="k">for</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="k">self</span><span class="py">.raw</span><span class="nf">.kind</span><span class="p">()</span> <span class="o">==</span> <span class="n">HEAP</span> <span class="p">{</span>
       <span class="k">let</span> <span class="n">dropped</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
-        <span class="c">// SAFETY: This is just reconstituting the box we dismantled</span>
-        <span class="c">// in Yarn::owned().</span>
+        <span class="c1">// SAFETY: This is just reconstituting the box we dismantled</span>
+        <span class="c1">// in Yarn::owned().</span>
         <span class="nn">Box</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="k">self</span><span class="py">.raw</span><span class="nf">.as_mut_slice</span><span class="p">())</span>
       <span class="p">};</span>
     <span class="p">}</span>
@@ -372,26 +372,26 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice_mut</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
-    <span class="c">// Same thing as as_slice, basically. This is just to make</span>
-    <span class="c">// Box::from_raw() above typecheck.</span>
+    <span class="c1">// Same thing as as_slice, basically. This is just to make</span>
+    <span class="c1">// Box::from_raw() above typecheck.</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>This gives us a type that strongly resembles <code class="language-plaintext highlighter-rouge">Cow&lt;str&gt;</code> with only half of the bytes. We can even write code to extend the lifetime of a <code class="language-plaintext highlighter-rouge">Yarn</code>:</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Removes the bound lifetime from the yarn, allocating if</span>
-  <span class="c">/// necessary.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">immortalize</span><span class="p">(</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'static</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="cd">/// Removes the bound lifetime from the yarn, allocating if</span>
+  <span class="cd">/// necessary.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">immortalize</span><span class="p">(</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="k">'static</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">if</span> <span class="k">self</span><span class="py">.raw</span><span class="nf">.kind</span><span class="p">()</span> <span class="o">==</span> <span class="n">BORROWED</span> <span class="p">{</span>
-      <span class="k">let</span> <span class="k">copy</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.as_slice</span><span class="p">()</span><span class="nf">.into</span><span class="p">();</span>
-      <span class="k">self</span> <span class="o">=</span> <span class="nn">Yarn</span><span class="p">::</span><span class="nf">owned</span><span class="p">(</span><span class="k">copy</span><span class="p">);</span>
+      <span class="k">let</span> <span class="n">copy</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span> <span class="o">=</span> <span class="k">self</span><span class="nf">.as_slice</span><span class="p">()</span><span class="nf">.into</span><span class="p">();</span>
+      <span class="k">self</span> <span class="o">=</span> <span class="nn">Yarn</span><span class="p">::</span><span class="nf">owned</span><span class="p">(</span><span class="n">copy</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="c">// We need to be careful that we discard the old yarn, since its</span>
-    <span class="c">// destructor may run and delete the heap allocation we created</span>
-    <span class="c">// above.</span>
+    <span class="c1">// We need to be careful that we discard the old yarn, since its</span>
+    <span class="c1">// destructor may run and delete the heap allocation we created</span>
+    <span class="c1">// above.</span>
     <span class="k">let</span> <span class="n">raw</span> <span class="o">=</span> <span class="k">self</span><span class="py">.raw</span><span class="p">;</span>
     <span class="nn">mem</span><span class="p">::</span><span class="nf">forget</span><span class="p">(</span><span class="k">self</span><span class="p">);</span>
-    <span class="nn">Yarn</span><span class="p">::</span><span class="o">&lt;</span><span class="nv">'static</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nn">Yarn</span><span class="p">::</span><span class="o">&lt;</span><span class="k">'static</span><span class="o">&gt;</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">,</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>The remaining two niches can be put to use for optimizing small strings.</p> <h2 id="small-string-optimization"><a href="#small-string-optimization">Small String Optimization</a></h2> <p>C++’s <code class="language-plaintext highlighter-rouge">std::string</code> also makes the “most strings are small” assumption. In the <code class="language-plaintext highlighter-rouge">libc++</code> implementation of the standard library, <code class="language-plaintext highlighter-rouge">std::string</code>s of up to 23 bytes never hit the heap!</p> <p>C++ implementations do this by using most of the pointer, length, and capacity fields as a storage buffer for small strings, the so-called “small string optimization” (SSO). In <code class="language-plaintext highlighter-rouge">libc++</code>, in SSO mode, a <code class="language-plaintext highlighter-rouge">std::string</code>’s length fits in one byte, so the other 23 bytes can be used as storage. The capacity isn’t stored at all: an SSO string always has a capacity of 23.</p> <p><code class="language-plaintext highlighter-rouge">RawYarn</code> still has another two niches, so let’s dedicate one to a “small” representation. In small mode, the kind will be 2, and only the 16th byte will be the length.</p> <p>This is why we used the two <em>high</em> bits of <code class="language-plaintext highlighter-rouge">len</code> for our scratch space: no matter what mode it’s in, we can easily extract these bits<sup id="fnref:big-endian" role="doc-noteref"><a href="#fn:big-endian" class="footnote" rel="footnote">5</a></sup>. Some of the existing <code class="language-plaintext highlighter-rouge">RawYarn</code> methods need to be updated, though.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="nd">#[repr(C)]</span>
@@ -404,11 +404,11 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="k">const</span> <span class="n">SMALL</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
-  <span class="c">/// a length, and a pointer.</span>
+  <span class="cd">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
+  <span class="cd">/// a length, and a pointer.</span>
   <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">SMALL</span><span class="p">);</span>
-    <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
+    <span class="nd">assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">:</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ptr</span><span class="p">),</span>
@@ -416,11 +416,11 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Extracts the slice out (regardless of kind).</span>
+  <span class="cd">/// Extracts the slice out (regardless of kind).</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">as_slice</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="p">{</span>
     <span class="k">let</span> <span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">adjust</span><span class="p">)</span> <span class="o">=</span> <span class="k">match</span> <span class="k">self</span><span class="nf">.kind</span><span class="p">()</span> <span class="p">{</span>
-      <span class="n">SMALL</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="n">Self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">8</span><span class="p">),</span>
-      <span class="mi">_</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span><span class="py">.ptr</span><span class="nf">.assume_init</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span>
+      <span class="n">SMALL</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="k">Self</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">8</span><span class="p">),</span>
+      <span class="n">_</span> <span class="k">=&gt;</span> <span class="p">(</span><span class="k">self</span><span class="py">.ptr</span><span class="nf">.assume_init</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span>
     <span class="p">};</span>
 
     <span class="nn">slice</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="p">(</span><span class="k">self</span><span class="py">.len</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">adjust</span><span class="p">))</span>
@@ -428,24 +428,24 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>In the non-<code class="language-plaintext highlighter-rouge">SMALL</code> case, we shift twice as before, but in the <code class="language-plaintext highlighter-rouge">SMALL</code> case, we need to get the high byte of the <code class="language-plaintext highlighter-rouge">len</code> field, so we need to shift down by an additional <code class="language-plaintext highlighter-rouge">usize::BITS - 8</code>. No matter what we’ve scribbled on the low bytes of <code class="language-plaintext highlighter-rouge">len</code>, we will always get just the length this way.</p> <p>We also need to use a different pointer value depending on whether we’re in <code class="language-plaintext highlighter-rouge">SMALL</code> mode. This is why <code class="language-plaintext highlighter-rouge">as_slice</code> needs to take a reference argument, since the slice data may be <em>directly</em> in <code class="language-plaintext highlighter-rouge">self</code>!</p> <p>Also, <code class="language-plaintext highlighter-rouge">ptr</code> is a <code class="language-plaintext highlighter-rouge">MaybeUninit</code> now, which will become clear in the next code listing.</p> <p>We should also provide a way to construct small strings.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">const</span> <span class="n">SSO_LEN</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="nn">size_of</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Create a new small yarn. `data` must be valid for `len` bytes</span>
-  <span class="c">/// and `len` must be smaller than `SSO_LEN`.</span>
+  <span class="cd">/// Create a new small yarn. `data` must be valid for `len` bytes</span>
+  <span class="cd">/// and `len` must be smaller than `SSO_LEN`.</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">from_small</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">RawYarn</span> <span class="p">{</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span><span class="p">);</span>
 
-    <span class="c">// Create a yarn with an uninitialized pointer value (!!)</span>
-    <span class="c">// and a length whose high byte is packed with `small` and</span>
-    <span class="c">// `len`.</span>
+    <span class="c1">// Create a yarn with an uninitialized pointer value (!!)</span>
+    <span class="c1">// and a length whose high byte is packed with `small` and</span>
+    <span class="c1">// `len`.</span>
     <span class="k">let</span> <span class="k">mut</span> <span class="n">yarn</span> <span class="o">=</span> <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">:</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">uninit</span><span class="p">(),</span>
       <span class="n">len</span><span class="p">:</span> <span class="p">(</span><span class="n">SMALL</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">&lt;&lt;</span> <span class="mi">6</span> <span class="p">|</span> <span class="n">len</span><span class="p">)</span>
           <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="nn">usize</span><span class="p">::</span><span class="n">BITS</span> <span class="o">-</span> <span class="mi">8</span><span class="p">),</span>
     <span class="p">};</span>
 
-    <span class="c">// Memcpy the data to the new yarn.</span>
-    <span class="c">// We write directly onto the `yarn` variable. We won't</span>
-    <span class="c">// overwrite the high-byte length because `len` will</span>
-    <span class="c">// never be &gt;= 16.</span>
+    <span class="c1">// Memcpy the data to the new yarn.</span>
+    <span class="c1">// We write directly onto the `yarn` variable. We won't</span>
+    <span class="c1">// overwrite the high-byte length because `len` will</span>
+    <span class="c1">// never be &gt;= 16.</span>
     <span class="nn">ptr</span><span class="p">::</span><span class="nf">copy_nonoverlapping</span><span class="p">(</span>
       <span class="n">data</span><span class="p">,</span>
       <span class="o">&amp;</span><span class="k">mut</span> <span class="n">yarn</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="n">RawYarn</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">,</span>
@@ -455,30 +455,30 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="n">yarn</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>The precise maximum size of an SSO string is a bit more subtle than what’s given above, but it captures the spirit. The <code class="language-plaintext highlighter-rouge">RawYarn::from_small</code> illustrates why the pointer value is hidden in a <code class="language-plaintext highlighter-rouge">MaybeUninit</code>: we’re above to overwrite it with garbage, and in that case it won’t be a pointer at all.</p> <p>We can update our public <code class="language-plaintext highlighter-rouge">Yarn</code> type to use the new small representation whenever possible.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">borrowed</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
 
     <span class="k">if</span> <span class="n">len</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="n">Self</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">Self</span> <span class="p">{</span>
         <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">)</span> <span class="p">},</span>
-        <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+        <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
       <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">BORROWED</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
-  <span class="c">/// Create a new yarn from owned data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from owned data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">owned</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">if</span> <span class="n">data</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="n">Self</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">Self</span> <span class="p">{</span>
         <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">data</span><span class="nf">.len</span><span class="p">(),</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">())</span> <span class="p">},</span>
-        <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+        <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
       <span class="p">}</span>
     <span class="p">}</span>
 
@@ -486,55 +486,55 @@ ascii: n  o  t     U  T  F  -  8</code></pre></figure><div class="codeblock-butt
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
     <span class="nn">mem</span><span class="p">::</span><span class="nf">forget</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">HEAP</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>It’s also possible to construct a <code class="language-plaintext highlighter-rouge">Yarn</code> directly from a character now, too!</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_char</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">char</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_char</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">char</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="k">mut</span> <span class="n">buf</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0u8</span><span class="p">;</span> <span class="mi">4</span><span class="p">];</span>
     <span class="k">let</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.encode_utf8</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">buf</span><span class="p">);</span>
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">)</span> <span class="p">},</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>(Note that we do not need to update <code class="language-plaintext highlighter-rouge">Yarn::immortalize()</code>; why?)</p> <p>What we have now is a maybe-owned string that does not require an allocation for small strings. However, we still have an extra niche…</p> <h2 id="string-constants"><a href="#string-constants">String Constants</a></h2> <p>String constants in Rust are interesting, because we can actually detect them at compile-time<sup id="fnref:leaks" role="doc-noteref"><a href="#fn:leaks" class="footnote" rel="footnote">6</a></sup>.</p> <p>We can use the last remaining niche, 3, to represent data that came from a string constant, which means that it does not need to be boxed to be immortalized.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">const</span> <span class="n">STATIC</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 
 <span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">Yarn</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="c">/// Create a new yarn from borrowed data.</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_static</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+  <span class="cd">/// Create a new yarn from borrowed data.</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">from_static</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.len</span><span class="p">();</span>
     <span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">data</span><span class="nf">.as_ptr</span><span class="p">()</span><span class="nf">.cast_mut</span><span class="p">();</span>
 
     <span class="k">if</span> <span class="n">len</span> <span class="o">&lt;=</span> <span class="n">SSO_LEN</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="n">Self</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">Self</span> <span class="p">{</span>
         <span class="n">raw</span><span class="p">:</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_small</span><span class="p">(</span><span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">)</span> <span class="p">},</span>
-        <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+        <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
       <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="n">Self</span> <span class="p">{</span>
+    <span class="k">Self</span> <span class="p">{</span>
       <span class="n">raw</span><span class="p">:</span> <span class="nn">RawYarn</span><span class="p">::</span><span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">STATIC</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">ptr</span><span class="p">),</span>
-      <span class="mi">_</span><span class="n">ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
+      <span class="n">_ph</span><span class="p">:</span> <span class="n">PhantomData</span><span class="p">,</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></figure><div class="codeblock-buttons"><div class="codeblock-button">Rust</div></div></div> <p>This function is identical to <code class="language-plaintext highlighter-rouge">Yarn::borrowed</code>, except that <code class="language-plaintext highlighter-rouge">data</code> most now have a static lifetime, and we pass <code class="language-plaintext highlighter-rouge">STATIC</code> to <code class="language-plaintext highlighter-rouge">RawYarn::from_raw_parts()</code>.</p> <p>Because of how we’ve written all of the prior code, this does not require any special support in <code class="language-plaintext highlighter-rouge">Yarn::immortalize()</code> or in the low-level <code class="language-plaintext highlighter-rouge">RawYarn</code> code.</p> <p>The actual <code class="language-plaintext highlighter-rouge">byteyarn</code> library provides a <code class="language-plaintext highlighter-rouge">yarn!()</code> macro that has the same syntax as <code class="language-plaintext highlighter-rouge">format!()</code>. This is the primary way in which yarns are created. It is has been carefully written so that <code class="language-plaintext highlighter-rouge">yarn!("this is a literal")</code> always produces a <code class="language-plaintext highlighter-rouge">STATIC</code> string, rather than a heap-allocated string.</p> <h2 id="an-extra-niche-as-a-treat"><a href="#an-extra-niche-as-a-treat">An extra niche, as a treat?</a></h2> <p>Unfortunately, because of how we’ve written it, <code class="language-plaintext highlighter-rouge">Option&lt;Yarn&gt;</code> is 24 bytes, a whole word larger than a <code class="language-plaintext highlighter-rouge">Yarn</code>. However, there’s still a little gap where we can fit the <code class="language-plaintext highlighter-rouge">None</code> variant. It turns out that because of how we’ve chosen the discriminants, <code class="language-plaintext highlighter-rouge">len</code> is zero if and only if it is an empty <code class="language-plaintext highlighter-rouge">BORROWED</code> string. But this is not the only zero: if the high byte is <code class="language-plaintext highlighter-rouge">0x80</code>, this is an empty <code class="language-plaintext highlighter-rouge">SMALL</code> string. If we simply require that no other empty string is ever constructed (by marking <code class="language-plaintext highlighter-rouge">RawYarn::from_raw_parts()</code> as unsafe and specifying it should not be passed a length of zero), we can guarantee that <code class="language-plaintext highlighter-rouge">len</code> is <em>never</em> zero.</p> <p>Thus, we can update <code class="language-plaintext highlighter-rouge">len</code> to be a <code class="language-plaintext highlighter-rouge">NonZeroUsize</code>.</p> <div class="codeblock"><figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="nd">#[repr(C)]</span>
 <span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
 <span class="k">struct</span> <span class="n">RawYarn</span> <span class="p">{</span>
   <span class="n">ptr</span><span class="p">:</span> <span class="n">MaybeUninit</span><span class="o">&lt;*</span><span class="k">mut</span> <span class="nb">u8</span><span class="o">&gt;</span><span class="p">,</span>
-  <span class="n">len</span><span class="p">:</span> <span class="n">NonZeroUsize</span><span class="p">,</span>  <span class="c">// (!!)</span>
+  <span class="n">len</span><span class="p">:</span> <span class="n">NonZeroUsize</span><span class="p">,</span>  <span class="c1">// (!!)</span>
 <span class="p">}</span>
 
 <span class="k">impl</span> <span class="n">RawYarn</span> <span class="p">{</span>
-  <span class="c">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
-  <span class="c">/// a *nonzero* length, and a pointer.</span>
+  <span class="cd">/// Constructs a new RawYarn from raw components: a 2-bit kind,</span>
+  <span class="cd">/// a *nonzero* length, and a pointer.</span>
   <span class="k">unsafe</span> <span class="k">fn</span> <span class="nf">from_raw_parts</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">len</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span> <span class="n">ptr</span><span class="p">:</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">SMALL</span><span class="p">);</span>
     <span class="nd">debug_assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">);</span>
-    <span class="k">assert</span><span class="o">!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
+    <span class="nd">assert!</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="nn">usize</span><span class="p">::</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"no way you have a string that big"</span><span class="p">);</span>
 
     <span class="n">RawYarn</span> <span class="p">{</span>
       <span class="n">ptr</span><span class="p">:</span> <span class="nn">MaybeUninit</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ptr</span><span class="p">),</span>
