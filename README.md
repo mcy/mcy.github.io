@@ -1,6 +1,6 @@
 # mcyoung's programming blog
 
-If you're looking for my art blog, you probasbly want
+If you're looking for my art blog, you probably want
 [art.mcyoung.xyz](https://art.mcyoung.xyz), instead.
 
 # Licensing
