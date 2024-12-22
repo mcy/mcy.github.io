@@ -1,0 +1,1 @@
+!function(){function o(o){let t=new URL(o),c=n[t.host];return c?(t.host=c,t.port="",t.toString()):""}function t(){let t=o(window.location.href);t&&window.location.replace(t)}const n={"mcy.gay":"mcyoung.xyz","www.mcy.gay":"mcyoung.xyz","art.mcy.gay":"art.mcyoung.xyz"};setTimeout(t,0)}();
