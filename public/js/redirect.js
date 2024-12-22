@@ -1,1 +1,1 @@
-!function(){function o(o){let t=new URL(o),c=n[t.host];return c?(t.host=c,t.port="",t.toString()):""}function t(){let t=o(window.location.href);t&&window.location.replace(t)}const n={"mcy.gay":"mcyoung.xyz","www.mcy.gay":"mcyoung.xyz","art.mcy.gay":"art.mcyoung.xyz"};setTimeout(t,0)}();
+!function(){function t(t){let e=new URL(t),n=e.searchParams.get("r");if(n){let t=new URL(window.origin);return e.host=n+"."+t.host,e.port="",e.searchParams["delete"]("r"),e.toString()}return""}function e(){let e=t(window.location.href);e&&window.location.replace(e)}setTimeout(e,0)}();
