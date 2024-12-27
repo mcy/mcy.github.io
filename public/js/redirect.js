@@ -1,1 +1,1 @@
-!function(){function t(t){let e=new URL(t),n=e.searchParams.get("r");if(n){let t=new URL(window.origin);return e.host=n+"."+t.host,e.port="",e.searchParams["delete"]("r"),e.toString()}return""}function e(){let e=t(window.location.href);e&&window.location.replace(e)}setTimeout(e,0)}();
+!function(){function n(n){let t=new URL(n),e=t.searchParams.get("r");if(e){let n=new URL(window.origin);return t.host=e+"."+n.host,t.port="",t.searchParams["delete"]("r"),t.toString()}return""}function t(){let t=n(window.location.href);t&&window.location.replace(t)}t()}();
